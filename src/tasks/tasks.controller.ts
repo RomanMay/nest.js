@@ -16,6 +16,11 @@ export class TasksController {
 
     constructor(private tasksService: TasksService) {}    
     
+    @Get('/all')
+    getAllTasks(filterDto: GetTasksFilterDto){
+        return this.tasksService.getAllTasks(filterDto)
+    }
+
     @Get()
     getTasks(
         @Query(ValidationPipe) filterDto: GetTasksFilterDto,
@@ -59,4 +64,14 @@ export class TasksController {
     ): Promise<Task> {
         return this.tasksService.updateTaskStatus(id, status, user)
     }
+
+    @Patch('/:id/assign')
+    assignUser(
+        @Param('id', ParseIntPipe) id: number,
+        @Param('userId') userId: number,
+        @GetUser() user: User
+    ): Promise<Task>{
+        return this.tasksService.assignUser(id,user,userId)
+    }
+       
 }

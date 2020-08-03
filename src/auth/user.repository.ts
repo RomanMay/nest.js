@@ -1,6 +1,5 @@
 import { EntityRepository, Repository } from "typeorm";
 import { User } from "./user.entity";
-import { InjectRepository } from "@nestjs/typeorm";
 import { AuthCredentialDto } from "./dto/auth-credentials.dto";
 import { ConflictException, InternalServerErrorException } from "@nestjs/common";
 import * as bcrypt from 'bcrypt'
@@ -26,6 +25,7 @@ export class UserRepository extends Repository<User> {
             }
         }  
     }
+
 
     async validateUserPassword(authCredentialDto: AuthCredentialDto): Promise<string> {
         const { username, password} = authCredentialDto

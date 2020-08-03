@@ -5,14 +5,15 @@ import { TaskRepository } from './task.rapositiry'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Task } from './task.entity'
 import { TaskStatus } from './task-status.enum'
-import { statSync } from 'fs'
 import { User } from 'src/auth/user.entity'
+import { UserRepository } from 'src/auth/user.repository'
 
 @Injectable()
 export class TasksService {
     constructor(
         @InjectRepository(TaskRepository)
-        private taskRepository: TaskRepository
+        private taskRepository: TaskRepository,
+        private userRepository: UserRepository
     ) {
         
     }
@@ -24,28 +25,11 @@ export class TasksService {
         return this.taskRepository.getTasks(filterDto, user)
 
     }
-    // getAllTasks(): Task[] {
-    //     return this.tasks
-    // }
-
-    // getTasksWithFilters(filterDto: GetTasksFilterDto): Task[] {
-    //     const { status, search} = filterDto
-
-    //     let tasks = this.getAllTasks()
-
-    //     if (status) {
-    //       tasks = tasks.filter(task => task.status === status)
-    //     }
-
-    //     if (search) {
-    //         tasks = tasks.filter(task =>
-    //             task.title.includes(search) ||
-    //             task.description.includes(search),
-    //             )
-    //     }
-    //     return tasks
-    // }
-
+    
+    async getAllTasks(filterDto: GetTasksFilterDto) {
+        return this.taskRepository.getAllTasks(filterDto)
+    }
+    
     async getTaskById(
         id:number,
         user: User
@@ -90,11 +74,15 @@ export class TasksService {
         return task
     }
 
+    async assignUser(
+        taskId: number,
+        ownerUser: User,
+        assignedUserId: number,
+        ): Promise<Task> {
+        const task = await this.getTaskById(taskId, ownerUser)
+        task.assignedUser = await this.userRepository.findOne(assignedUserId)
+        const savedTask =  await task.save()
+        return savedTask
+    }
 
-
-    // updateTaskStatus(id: string, status: TaskStatus): Task{
-    //     const task = this.getTaskById(id)
-    //     task.status = status
-    //     return task
-    // }
 }

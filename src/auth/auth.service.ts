@@ -4,9 +4,11 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { AuthCredentialDto } from './dto/auth-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
+import { User } from './user.entity'
 
 @Injectable()
 export class AuthService {
+
     constructor(
         @InjectRepository(UserRepository)
         private userRepository: UserRepository,
@@ -27,6 +29,16 @@ export class AuthService {
         const accessToken = await this.jwtService.sign(payload)
 
         return {accessToken}
+    }
+
+    async getUserById(
+        id: number,
+        user: User
+    ): Promise<User> {
+    
+        console.log(user, id)
+        const foundUser = await this.userRepository.findOne({where: {id: user.id}})
+        return foundUser
     }
     
 }

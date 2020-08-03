@@ -9,13 +9,28 @@ import { Logger, InternalServerErrorException } from '@nestjs/common'
 @EntityRepository(Task)
 export class TaskRepository extends Repository<Task> {
     private logger = new Logger('TaskRepository')
+
+    async getAllTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
+       
+        const query = this.createQueryBuilder('task')
+
+        try{
+            const task = query.getMany()
+            return task
+        }catch(error) {
+            throw new InternalServerErrorException()
+        }
+    }
+
     async getTasks(
         filterDto: GetTasksFilterDto,
         user: User
         ): Promise<Task[]> {
         const {status, search} = filterDto
         const query = this.createQueryBuilder('task')
+
         query.where('task.userId = :userId', {userId: user.id})
+
         if(status) {
             query.andWhere('task.status = :status', {status})
         }

@@ -8,7 +8,6 @@ import { Logger, InternalServerErrorException } from '@nestjs/common'
 
 @EntityRepository(Task)
 export class TaskRepository extends Repository<Task> {
-    private logger = new Logger('TaskRepository')
 
     async getAllTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
        
@@ -22,14 +21,15 @@ export class TaskRepository extends Repository<Task> {
         }
     }
 
-    async getTasks(
-        filterDto: GetTasksFilterDto,
-        user: User
-        ): Promise<Task[]> {
+    async getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
+
         const {status, search} = filterDto
+
         const query = this.createQueryBuilder('task')
 
-        query.where('task.userId = :userId', {userId: user.id})
+        query.where('task.userId = :userId OR task.assignedUser = :userId', {userId: user.id, assignedUser: user.id})
+
+                
 
         if(status) {
             query.andWhere('task.status = :status', {status})
@@ -43,16 +43,13 @@ export class TaskRepository extends Repository<Task> {
             const task = query.getMany()
             return task
         }catch(error) {
-            this.logger.error(`Failed to get tasks for user "${user.username}'. Filters ${JSON.stringify(filterDto)}`)
             throw new InternalServerErrorException()
         }
         
     }
 
-    async createTask(
-        createTaskDto: CreateTaskDto,
-        user: User
-        ) {
+    async createTask(createTaskDto: CreateTaskDto, user: User) {
+
         const {title, description} = createTaskDto
         
         const task = new Task()

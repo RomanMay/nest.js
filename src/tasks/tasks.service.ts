@@ -35,7 +35,7 @@ export class TasksService {
             .getOne()
 
         if(!task) {
-            throw new NotFoundException(`Task with id ${id} not found`)
+            throw new NotFoundException(`Task with id ${id} is not found`)
         }
 
         return task

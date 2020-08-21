@@ -21,8 +21,8 @@ export class TasksController {
     }
 
     @Get('/usertasks')
-    getTasks( @Query(ValidationPipe) filterDto: GetTasksFilterDto, @GetUser() user: User, assignedUser: Task ) {
-        return this.tasksService.getTasks(filterDto, user, assignedUser)
+    getTasks( @Query(ValidationPipe) filterDto: GetTasksFilterDto, @GetUser() user: User) {
+        return this.tasksService.getTasks(filterDto, user)
     }
 
     @Get('/:id')
@@ -47,8 +47,11 @@ export class TasksController {
     }
 
     @Patch('/:id/assign')
-    assignUser(@Param('id', ParseIntPipe) id: number, @Param('userId') userId: number, @GetUser() user: User): Promise<Task>{
-        return this.tasksService.assignUser(id,user,userId)
+    assignUser(
+        @Param('id', ParseIntPipe) id: number, 
+        @Body('assignedUser') userId: number, 
+        @GetUser() user: User): Promise<Task>{
+        return this.tasksService.assignUser(id, user, userId)
     }
        
 }

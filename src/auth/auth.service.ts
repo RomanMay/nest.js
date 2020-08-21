@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { UserRepository } from './user.repository'
 import { InjectRepository } from '@nestjs/typeorm'
-import { AuthCredentialDto } from './dto/auth-credentials.dto';
-import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from './jwt-payload.interface';
+import { AuthCredentialDto } from './dto/auth-credentials.dto'
+import { JwtService } from '@nestjs/jwt'
+import { JwtPayload } from './jwt-payload.interface'
 import { User } from './user.entity'
 
 @Injectable()
@@ -31,12 +31,7 @@ export class AuthService {
         return {accessToken}
     }
 
-    async getUserById(
-        id: number,
-        user: User
-    ): Promise<User> {
-    
-        console.log(user, id)
+    async getUserById(id: number, user: User): Promise<User> {
         const foundUser = await this.userRepository.findOne({where: {id: user.id}})
         return foundUser
     }

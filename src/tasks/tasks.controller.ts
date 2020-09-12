@@ -8,6 +8,7 @@ import { TaskStatus } from './task-status.enum'
 import { AuthGuard } from '@nestjs/passport'
 import { GetUser } from 'src/auth/get-user.decorator'
 import { User } from 'src/auth/user.entity'
+import { Project } from 'src/projects/project.entity'
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
@@ -26,14 +27,21 @@ export class TasksController {
     }
 
     @Get('/:id')
-    getTaskById(@Param('id', ParseIntPipe) id: number, @GetUser() user: User): Promise<Task>{
+    getTaskById(
+        @Param('id', ParseIntPipe) id: number,
+        @GetUser() user: User):
+        Promise<Task>{
         return this.tasksService.getTaskById(id, user)
     }
 
     @Post()
     @UsePipes(ValidationPipe)
-    createTask( @Body() createTaskDto: CreateTaskDto, @GetUser() user: User): Promise<Task> {
-        return this.tasksService.createTask(createTaskDto, user)
+    createTask( 
+        @Body() createTaskDto: CreateTaskDto,
+        @Body('projectId') project: number,
+        @GetUser() user: User):
+      Promise<Task> {
+        return this.tasksService.createTask(createTaskDto, user, project)
     }
      
     @Delete('/:id')
@@ -42,14 +50,18 @@ export class TasksController {
     }
 
     @Patch('/:id/status')
-    updateTaskStatus(@Param('id', ParseIntPipe) id: number, @Body('status', TaskStatusValidationPipe) status: TaskStatus, @GetUser() user: User): Promise<Task> {
+    updateTaskStatus(
+        @Param('id', ParseIntPipe) id: number,
+        @Body('status', TaskStatusValidationPipe) status: TaskStatus,
+        @GetUser() user: User):
+        Promise<Task> {
         return this.tasksService.updateTaskStatus(id, status, user)
     }
 
     @Patch('/:id/assign')
     assignUser(
         @Param('id', ParseIntPipe) id: number, 
-        @Body('assignedUser') userId: number, 
+        @Body('assignedUser') userId: number,
         @GetUser() user: User): Promise<Task>{
         return this.tasksService.assignUser(id, user, userId)
     }

@@ -8,13 +8,17 @@ import { TaskStatus } from './task-status.enum'
 import { User } from 'src/auth/user.entity'
 import { UserRepository } from 'src/auth/user.repository'
 import { getRepository } from 'typeorm'
+import { Project } from 'src/projects/project.entity'
+import { ProjectRepository } from 'src/projects/project.repository'
 
 @Injectable()
 export class TasksService {
     constructor(
         @InjectRepository(TaskRepository)
         private taskRepository: TaskRepository,
-        private userRepository: UserRepository
+        private userRepository: UserRepository,
+        private projectRepository: ProjectRepository,
+        
     ) {
         
     }
@@ -28,10 +32,13 @@ export class TasksService {
         return this.taskRepository.getAllTasks(filterDto)
     }
     
-    async getTaskById(id:number, user: User): Promise<Task> {
+    async getTaskById(id: number, user: User): Promise<Task> {
+
         const task = await getRepository(Task).createQueryBuilder("task")
+            // .leftJoinAndSelect('project.tasks', 'task')
             .where('task.id = :id' , {id})
             .andWhere('(task.assignedUser = :userId OR task.userId = :userId)', {userId: user.id})
+
             .getOne()
 
         if(!task) {
@@ -42,8 +49,29 @@ export class TasksService {
 
     }
 
-    async createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
-        return this.taskRepository.createTask(createTaskDto, user)
+   
+
+    async createTask(
+        createTaskDto: CreateTaskDto, 
+        user: User, 
+        id: number): 
+        Promise<Task> {
+            const proj = await getRepository(Project).createQueryBuilder("project")
+                .leftJoinAndSelect( "project.users" ,"user")
+                .where("user.id = :userId", {userId: user.id} )
+                .andWhere("project.id = :id", {id})
+                .getOne()
+
+        if(!proj){
+            throw new NotFoundException(`Project with id ${id} is not found`)
+        }else{
+            const  newTask = await this.taskRepository.createTask(createTaskDto, user, proj)
+            return this.taskRepository.save(newTask)
+        }
+
+            // const getProject = await this.projectRepository.findOne(project)
+            
+        
     }
 
     async deleteTask(id: number, user: User): Promise<void> {

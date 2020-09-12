@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { typeOrmConfig } from '../typeorm.config'
 import { AuthModule } from './auth/auth.module'
 import { ConfigModule } from '@nestjs/config'
+import { ProjectModule } from './projects/project.module'
 
 
 @Module({
@@ -11,7 +12,8 @@ import { ConfigModule } from '@nestjs/config'
     TasksModule,
     TypeOrmModule.forRoot(typeOrmConfig),
     ConfigModule.forRoot(),
-    AuthModule
+    AuthModule,
+    ProjectModule
   ],
 
 })

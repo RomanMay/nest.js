@@ -5,6 +5,8 @@ import { TaskStatus } from './task-status.enum'
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto'
 import { User } from 'src/auth/user.entity'
 import { Logger, InternalServerErrorException } from '@nestjs/common'
+import { Project } from 'src/projects/project.entity'
+import { ProjectModule } from 'src/projects/project.module'
 
 @EntityRepository(Task)
 export class TaskRepository extends Repository<Task> {
@@ -45,15 +47,18 @@ export class TaskRepository extends Repository<Task> {
         
     }
 
-    async createTask(createTaskDto: CreateTaskDto, user: User) {
+    async createTask(createTaskDto: CreateTaskDto, user: User, project: Project) {
 
         const {title, description} = createTaskDto
+
         
+                    
         const task = new Task()
         task.title = title
         task.description = description
         task.status = TaskStatus.OPEN
         task.user = user
+        task.project = project
 
         await task.save()
         delete task.user

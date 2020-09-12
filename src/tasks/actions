@@ -1,0 +1,4 @@
+User(id) created a task(task title)
+User(id) deleted the task
+User(id) changed task status(old status -> new status)
+User(id) assigned new user(id) to task

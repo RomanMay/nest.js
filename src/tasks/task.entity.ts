@@ -1,6 +1,9 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm'
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm'
 import { TaskStatus } from './task-status.enum'
 import { User } from '../auth/user.entity'
+import { Project } from '../projects/project.entity'
+import { LoggerService } from '@nestjs/common'
+import { Logs } from '../logger/logs.entity'
 
 @Entity()
 export class Task extends BaseEntity {
@@ -24,4 +27,10 @@ export class Task extends BaseEntity {
 
     @ManyToOne(user => User, user => user.tasks, {eager: false})
     assignedUser: User
+
+    @ManyToOne(project => Project, project => project.tasks)
+    project: Project
+
+    @OneToMany(type => Logs, logs => logs.task)
+    logs: Logs[]
 }

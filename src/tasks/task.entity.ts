@@ -1,12 +1,13 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm'
-import { TaskStatus } from './task-status.enum'
-import { User } from '../auth/user.entity'
-import { Project } from '../projects/project.entity'
-import { LoggerService } from '@nestjs/common'
-import { Logs } from '../logger/logs.entity'
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, DeleteDateColumn } from 'typeorm'
 
-@Entity()
-export class Task extends BaseEntity {
+import { TaskStatus } from './task-status.enum'
+
+import { UserEntity } from '../auth/user.entity'
+import { ProjectEntity } from '../projects/project.entity'
+import { LogEntity } from '../logger/logs.entity'
+
+@Entity({name: 'task'})
+export class TaskEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number
 
@@ -16,21 +17,24 @@ export class Task extends BaseEntity {
     @Column()
     description: string
 
-    @Column({type: 'enum', enum: TaskStatus, default: TaskStatus.OPEN})
+    @Column({type: 'enum', enum: TaskStatus, default: TaskStatus.open})
     status: TaskStatus
 
-    @ManyToOne(user => User, user => user.tasks, {eager: false})
-    user: User
+    @ManyToOne(user => UserEntity, user => user.tasks, {eager: false})
+    user: UserEntity
 
     @Column()
     userId: number
 
-    @ManyToOne(user => User, user => user.tasks, {eager: false})
-    assignedUser: User
+    @ManyToOne(user => UserEntity, user => user.tasks, {eager: false})
+    assignedUser: UserEntity
 
-    @ManyToOne(project => Project, project => project.tasks)
-    project: Project
+    @ManyToOne(project => ProjectEntity, project => project.tasks)
+    project: ProjectEntity
 
-    @OneToMany(type => Logs, logs => logs.task)
-    logs: Logs[]
+    @OneToMany(type => LogEntity, logs => logs.task)
+    logs: LogEntity[]
+    
+    @DeleteDateColumn({ name: 'deleted_at' })
+    public deletedAt: Date
 }

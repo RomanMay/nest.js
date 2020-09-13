@@ -1,21 +1,42 @@
 import { Injectable } from "@nestjs/common";
-import { TasksModule } from "src/tasks/tasks.module";
+import { UserEntity } from "src/auth/user.entity";
+import { TaskEntity } from "src/tasks/task.entity";
 
-import { UserRepository } from "../auth/user.repository";
-import { TaskRepository } from "../tasks/task.repository";
+import { LogsRepository } from "./logger.repository";
 
-import {TaskActionsLogsEnum} from "./task-logs.enum"
+import { ActionMessageOptions } from "./actionMessageOptions";
+import { TaskLogActionTypes } from "./task-logs.enum"
 
 @Injectable()
-export class LoggerService{
+export class LoggerService {
     constructor(
-        private userRepository: UserRepository,
-        private taskRepository: TaskRepository
+        private logRepository: LogsRepository
     ){}
 
-    async writeLog(logMessage: TaskActionsLogsEnum) {
-        
+    async writeLog(actionType: TaskLogActionTypes,
+        affectedUser: UserEntity,
+        task: TaskEntity,
+        options?: ActionMessageOptions,
+        ){
+            const actionMessage = this.buildActionMessage(actionType, options)
+
+            const newLog = this.logRepository.create({
+                actionMessage,
+                affectedUser,
+                task
+            })
+
+        return this.logRepository.save(newLog)
     }
 
-
+    buildActionMessage(actionType: TaskLogActionTypes, option?: ActionMessageOptions): string{
+        switch(actionType){
+            case TaskLogActionTypes.changeStatus:
+                return `${actionType} from ${option.taskStatuses.old} to ${option.taskStatuses.new}`
+            case TaskLogActionTypes.assignUser:
+                return `${actionType} : ${option.assignedUserId}`
+            default:
+                return actionType
+        }
+    }
 }

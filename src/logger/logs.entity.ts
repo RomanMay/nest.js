@@ -1,10 +1,10 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-import { Task } from "../tasks/task.entity";
-import { User } from "../auth/user.entity";
+import { TaskEntity } from "../tasks/task.entity";
+import { UserEntity } from "../auth/user.entity";
 
-@Entity()
-export class Logs extends BaseEntity {
+@Entity({name : 'log'})
+export class LogEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number
 
@@ -12,13 +12,14 @@ export class Logs extends BaseEntity {
     createdAt: Date
 
     @Column()
-    logMessage: string
+    actionMessage: string
 
-    @ManyToOne(user => User, user => user.logs)
-    affectedUser: User
+    @Column()
+    affectedUserId: number
 
-    @ManyToOne(task => Task, task => task.logs)
-    task: Task
+    @ManyToOne(user => UserEntity, user => user.logs)
+    affectedUser: UserEntity
 
-    
+    @ManyToOne(task => TaskEntity, task => task.logs)
+    task: TaskEntity
 }

@@ -1,9 +1,13 @@
 import { Controller, Post, Body, ValidationPipe, UseGuards, Req, ParseIntPipe, Get, Param } from '@nestjs/common'
-import { AuthCredentialDto } from './dto/auth-credentials.dto'
-import { AuthService } from './auth.service'
-import { GetUser } from './get-user.decorator'
-import { User } from './user.entity'
 import { AuthGuard } from '@nestjs/passport'
+
+import { AuthCredentialDto } from './dto/auth-credentials.dto'
+
+import { AuthService } from './auth.service'
+
+import { GetUser } from './get-user.decorator'
+
+import { UserEntity } from './user.entity'
 
 @Controller('auth')
 export class AuthController {
@@ -23,7 +27,7 @@ export class AuthController {
 
     @UseGuards(AuthGuard())
     @Get('/getUser/:id')
-    getUserById(@Param('id', ParseIntPipe) id: number, @GetUser() user: User): Promise<User>{
+    getUserById(@Param('id', ParseIntPipe) id: number, @GetUser() user: UserEntity): Promise<UserEntity>{
     return this.authService.getUserById(id, user)
     }
 

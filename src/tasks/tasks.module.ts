@@ -1,18 +1,24 @@
 import { Module } from '@nestjs/common'
-import { TasksController } from './tasks.controller'
-import { TasksService } from './tasks.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
+
+import { TasksController } from './tasks.controller'
+
+import { TasksService } from './tasks.service'
+import { LoggerService } from '../logger/logger.service'
+
 import { TaskRepository } from './task.repository'
-import { AuthModule } from 'src/auth/auth.module'
-import { UserRepository } from 'src/auth/user.repository'
-import { ProjectRepository } from 'src/projects/project.repository'
+import { UserRepository } from '../auth/user.repository'
+import { ProjectRepository } from '../projects/project.repository'
+import { LogsRepository } from 'src/logger/logger.repository'
+
+import { AuthModule } from '../auth/auth.module'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TaskRepository, UserRepository, ProjectRepository]),
+    TypeOrmModule.forFeature([TaskRepository, UserRepository, ProjectRepository, LogsRepository]),
     AuthModule
   ],
   controllers: [TasksController],
-  providers: [TasksService]
+  providers: [TasksService, LoggerService]
 })
 export class TasksModule {}

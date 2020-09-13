@@ -1,6 +1,6 @@
-export enum TaskActionsLogsEnum {
-    DELETE = 'deleted task',
-    CHANGE = 'changed task status',
-    CREATE = 'created task',
-    ASSIGN = 'assigned to task'
+export enum TaskLogActionTypes {
+    create = 'task created',
+    changeStatus = 'changed task status',
+    assignUser = ' new user assigned to task: ',
+    delete = 'task deleted',
 }

@@ -1,19 +1,20 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
-import { Task } from '../tasks/task.entity';
-import { User } from '../auth/user.entity';
+
+import { TaskEntity } from '../tasks/task.entity';
+import { UserEntity } from '../auth/user.entity';
 
 @Entity({name: 'project'})
-export class Project {
+export class ProjectEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column()
     name : string;
 
-    @OneToMany(type => Task, task => task.project)
-    tasks: Task[]
+    @OneToMany(type => TaskEntity, task => task.project)
+    tasks: TaskEntity[]
 
-    @ManyToMany(() => User, user => user.projects)
-    users: User[]
-    project: User;
+    @ManyToMany(() => UserEntity, user => user.projects)
+    users: UserEntity[]
+    project: UserEntity;
 }

@@ -1,12 +1,16 @@
 import { Module } from '@nestjs/common';
-import { ProjectController } from './project.controller';
-import { ProjectService } from './project.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { ProjectController } from './project.controller';
+
+import { ProjectService } from './project.service';
+
 import { TaskRepository } from '../tasks/task.repository';
 import { UserRepository } from '../auth/user.repository';
+import { ProjectRepository } from './project.repository';
+
 import { AuthModule } from '../auth/auth.module';
 import { TasksModule } from '../tasks/tasks.module';
-import { ProjectRepository } from './project.repository';
 
 
 @Module({

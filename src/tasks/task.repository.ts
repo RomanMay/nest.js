@@ -1,34 +1,22 @@
-import {Task} from './task.entity'
-import{ EntityRepository, Repository} from 'typeorm'
+import { EntityRepository, Repository } from 'typeorm'
+import { NotFoundException } from '@nestjs/common'
+
+import { TaskEntity } from './task.entity'
+import { UserEntity } from 'src/auth/user.entity'
+import { ProjectEntity } from 'src/projects/project.entity'
+
 import { CreateTaskDto } from './dto/create-task.dto'
-import { TaskStatus } from './task-status.enum'
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto'
-import { User } from 'src/auth/user.entity'
-import { Logger, InternalServerErrorException } from '@nestjs/common'
-import { Project } from 'src/projects/project.entity'
-import { ProjectModule } from 'src/projects/project.module'
 
-@EntityRepository(Task)
-export class TaskRepository extends Repository<Task> {
+@EntityRepository(TaskEntity)
+export class TaskRepository extends Repository<TaskEntity> {
 
-    async getAllTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
-       
-        const query = this.createQueryBuilder('task')
-
-        try{
-            const task = query.getMany()
-            return task
-        }catch(error) {
-            throw new InternalServerErrorException()
-        }
-    }
-
-    async getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
+    async getFilteredByUser(filterDto: GetTasksFilterDto, user: UserEntity): Promise<TaskEntity[]> {
 
         const {status, search} = filterDto
 
         const query = this.createQueryBuilder('task')
-        query.where('task.userId = :userId OR task.assignedUser = :userId', {userId: user.id})       
+        query.where('task.userId = :userId OR task.assignedUser = :userId', {userId: user.id})
 
         if(status) {
             query.andWhere('task.status = :status', {status})
@@ -38,31 +26,39 @@ export class TaskRepository extends Repository<Task> {
             query.andWhere('task.title LIKE :search OR task.description LIKE :search', {search: `%${search}%`})
         }
 
-        try{
-            const task = query.getMany()
-            return task
-        }catch(error) {
-            throw new InternalServerErrorException()
-        }
-        
+        return query.getMany()
+
     }
 
-    async createTask(createTaskDto: CreateTaskDto, user: User, project: Project) {
+    createTask(createTaskDto: CreateTaskDto, user: UserEntity, project: ProjectEntity) {
 
         const {title, description} = createTaskDto
 
-        
-                    
-        const task = new Task()
-        task.title = title
-        task.description = description
-        task.status = TaskStatus.OPEN
-        task.user = user
-        task.project = project
+        return this.create({
+            title,
+            description,
+            user,
+            project,
+        })
+    }
 
-        await task.save()
-        delete task.user
+    async getFullInformationById(taskId, userId): Promise<TaskEntity>{
+        return this.createQueryBuilder("task")
+            .leftJoin('task.logs', 'logs')
+            .where('task.id = :taskId' , {taskId})
+            .andWhere('(task.assignedUser = :userId OR task.userId = :userId)', {userId})
+            .getOne()
+    }
 
+    async getByIdOrFail(taskId, userId): Promise<TaskEntity>{
+        const task = this.createQueryBuilder("task")
+            .where('task.id = :taskId' , {taskId})
+            .andWhere('(task.assignedUser = :userId OR task.userId = :userId)', {userId})
+            .getOne()
+
+        if(!task) {
+            throw new NotFoundException(`Task with id ${taskId} is not found`)
+        }
         return task
     }
 }

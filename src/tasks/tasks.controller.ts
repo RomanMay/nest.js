@@ -1,73 +1,109 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, Query, UsePipes, ValidationPipe, ParseIntPipe, UseGuards, Logger } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Delete, Patch, Query, UsePipes, ValidationPipe, ParseIntPipe, UseGuards, Logger, All, Ip } from '@nestjs/common'
 import { TaskStatusValidationPipe } from './pipes/task-status-validation.pipe'
 import { AuthGuard } from '@nestjs/passport'
 
 import { TasksService } from './tasks.service'
+import {ApiService} from '../shared/ApiService'
+
 import { TaskEntity } from './task.entity'
-import { UserEntity } from 'src/auth/user.entity'
+import { UserEntity } from '../auth/user.entity'
 
 import { CreateTaskDto } from './dto/create-task.dto'
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto'
+import { TaskResponseDto } from './dto/task-response.dto'
+import { AllTasksResponseDto } from './dto/all-tasks-response.dto'
 
 import { TaskStatus } from './task-status.enum'
 
-import { GetUser } from 'src/auth/get-user.decorator'
+import { GetUser } from '../auth/get-user.decorator'
 
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
 
-    constructor(private tasksService: TasksService) {}    
+    constructor(private tasksService: TasksService, private apiService: ApiService) {}    
     
     @Get('/all')
     getAllTasks(filterDto: GetTasksFilterDto){
+
         return this.tasksService.getAllTasks(filterDto)
     }
 
     @Get('/usertasks')
-    getTasks( @Query(ValidationPipe) filterDto: GetTasksFilterDto, @GetUser() user: UserEntity) {
-        return this.tasksService.getFilteredByUser(filterDto, user)
+    async getTasks( 
+        @Query(ValidationPipe) filterDto: GetTasksFilterDto,
+        @GetUser() user: UserEntity,
+        @Ip() ipAddress: string
+    ):Promise<AllTasksResponseDto[]> {
+        
+        const allTasks = await this.tasksService.getFilteredByUser(filterDto, user)
+
+        return allTasks.map(task => {return new AllTasksResponseDto(task)})
     }
 
     @Get('/:id')
-    getTaskById(
+    async getTaskById(
         @Param('id', ParseIntPipe) id: number,
-        @GetUser() user: UserEntity):
-        Promise<TaskEntity>{
-        return this.tasksService.getTaskById(id, user)
+        @GetUser() user: UserEntity
+    ):Promise<TaskResponseDto>{
+            
+            const task = await this.tasksService.getTaskById(id,user)
+        
+            return new TaskResponseDto(task)
     }
 
     @Post()
     @UsePipes(ValidationPipe)
-    createTask( 
+    async createTask( 
         @Body() createTaskDto: CreateTaskDto,
         @Body('projectId') project: number,
-        @GetUser() user: UserEntity):
-      Promise<TaskEntity> {
-        return this.tasksService.createTask(createTaskDto, user, project)
+        @Ip() ipAddress: string,
+        @GetUser() user: UserEntity,
+        city: string
+    ):Promise<TaskEntity> {
+        const getcity = await this.apiService.getDataFromApi(ipAddress)
+        console.log('city -> ', getcity)
+        return await this.tasksService.createTask(createTaskDto, user, project, ipAddress, city)
     }
      
     @Delete('/:id')
-    deleteTask(@Param('id', ParseIntPipe) id: number, @GetUser() user: UserEntity): Promise<void>{
-        return this.tasksService.deleteTask(id, user)
+    async deleteTask(
+        @Param('id', ParseIntPipe) id: number, 
+        @GetUser() user: UserEntity,
+        @Ip() ipAddress: string,
+        city: string
+    ): Promise<void>{
+        console.log('ip -> ', ipAddress)
+
+        const getcity = await this.apiService.getDataFromApi(ipAddress)
+        return await this.tasksService.deleteTask(id, user, ipAddress, getcity)
+
     }
 
     @Patch('/:id/status')
     updateTaskStatus(
         @Param('id', ParseIntPipe) id: number,
         @Body('status', TaskStatusValidationPipe) status: TaskStatus,
-        @GetUser() user: UserEntity):
+        @Ip() ipAddress: string,
+        @GetUser() user: UserEntity,
+        city: string
+    ):
         Promise<TaskEntity> {
-        return this.tasksService.updateTaskStatus(id, status, user)
+        return this.tasksService.updateTaskStatus(id, status, user, ipAddress,city)
     }
 
     @Patch('/:id/assign')
-    assignUser(
+    async assignUser(
         @Param('id', ParseIntPipe) id: number, 
         @Body('assignedUser') userId: number,
-        @GetUser() user: UserEntity): Promise<TaskEntity>{
-        return this.tasksService.assignUser(id, user, userId)
+        @Ip() ipAddress: string,
+        @GetUser() user: UserEntity, 
+    ): Promise<TaskEntity>{
+
+        const getcity = await this.apiService.getDataFromApi(ipAddress)
+        console.log('city' , getcity)
+        return this.tasksService.assignUser(id, user, userId, ipAddress, getcity)
     }
        
 }

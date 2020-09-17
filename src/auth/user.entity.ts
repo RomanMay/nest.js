@@ -19,9 +19,15 @@ export class UserEntity extends BaseEntity {
 
     @Column()
     salt: string
+
+    @Column({nullable: true})
+    avatar: string
     
-    @OneToMany(type => TaskEntity, task => task.user, {eager: true})
+    @OneToMany(type => TaskEntity, task => task.author, {eager: true})
     tasks: TaskEntity[]
+    
+    @OneToMany(type => TaskEntity, task => task.assignedUser, {eager: true})
+    assignedTasks: TaskEntity[]
     
     @ManyToMany(type => ProjectEntity, project => project.users, {cascade: true})
     @JoinTable()

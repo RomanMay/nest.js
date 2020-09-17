@@ -21,12 +21,12 @@ export class TaskEntity extends BaseEntity {
     status: TaskStatus
 
     @ManyToOne(user => UserEntity, user => user.tasks, {eager: false})
-    user: UserEntity
+    author: UserEntity
 
     @Column()
-    userId: number
+    authorId: number
 
-    @ManyToOne(user => UserEntity, user => user.tasks, {eager: false})
+    @ManyToOne(user => UserEntity, user => user.assignedTasks, {eager: false})
     assignedUser: UserEntity
 
     @ManyToOne(project => ProjectEntity, project => project.tasks)

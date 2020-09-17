@@ -7,13 +7,18 @@ import { CreateProjectDto } from "./dto/create-project.dto";
 
 import { UserEntity } from "../auth/user.entity";
 import { ProjectEntity } from "./project.entity";
+import { ProjectResponseDto } from "./dto/project-response.dto";
+import { LogResponseDto } from "src/logger/dto/log-response.dto";
+import { LogEntity } from "src/logger/logs.entity";
+import { LogsRepository } from "src/logger/logger.repository";
 
 
 @Injectable()
 export class ProjectService {
     constructor(
         private userRepository: UserRepository,
-        private projectRepository: ProjectRepository
+        private projectRepository: ProjectRepository,
+        private loggerRepository: LogsRepository,
     ){}
 
     async createProject(createProjectDto: CreateProjectDto, user: UserEntity): Promise<ProjectEntity> {
@@ -28,8 +33,23 @@ export class ProjectService {
             throw new NotFoundException(`Project with id ${id} is not found`)
         }
 
+        return proj 
+    }
+
+    async getLogsOld(projectId: number, user: UserEntity): Promise<LogEntity[]> {
+        const proj = await this.projectRepository.getLogs(projectId, user.id)
         return proj
     }
+
+    async getLogs(projectId: number, user: UserEntity): Promise<LogEntity[]> {
+        const project = await this.projectRepository.getById(projectId, user.id)
+        if(!project) { 
+            throw new Error('kek')
+        }        
+
+        return this.loggerRepository.getLogs(projectId)
+    }
+
 
     async addUserToProject(projectId: number, user: UserEntity, assignedUserId: number): Promise<ProjectEntity> {
  

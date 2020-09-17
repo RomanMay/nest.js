@@ -8,6 +8,7 @@ import { AuthService } from './auth.service'
 import { GetUser } from './get-user.decorator'
 
 import { UserEntity } from './user.entity'
+import { UserResponseDto } from './dto/user-response.dto'
 
 @Controller('auth')
 export class AuthController {
@@ -27,8 +28,12 @@ export class AuthController {
 
     @UseGuards(AuthGuard())
     @Get('/getUser/:id')
-    getUserById(@Param('id', ParseIntPipe) id: number, @GetUser() user: UserEntity): Promise<UserEntity>{
-    return this.authService.getUserById(id, user)
+    async getUserById(
+        @Param('id', ParseIntPipe) id: number, 
+        @GetUser() user: UserEntity
+    ): Promise<UserResponseDto>{
+        const userById = await this.authService.getUserById(id, user)
+    return new UserResponseDto(userById)
     }
 
 }

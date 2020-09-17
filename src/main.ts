@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common'
 import { AppModule } from './app.module'
 import "reflect-metadata"
 import * as config from 'config'
+import * as requestIp from 'request-ip';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap')

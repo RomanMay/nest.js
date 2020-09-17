@@ -17,6 +17,12 @@ export class LogEntity extends BaseEntity {
     @Column()
     affectedUserId: number
 
+    @Column({nullable: true})
+    city: string
+
+    @Column({nullable: true})
+    ip: string
+
     @ManyToOne(user => UserEntity, user => user.logs)
     affectedUser: UserEntity
 

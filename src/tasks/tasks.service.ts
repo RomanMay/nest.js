@@ -12,6 +12,9 @@ import { GetTasksFilterDto } from './dto/get-tasks-filter.dto'
 import { TaskStatus } from './task-status.enum'
 import { LoggerService } from '../logger/logger.service'
 import { TaskLogActionTypes } from 'src/logger/task-logs.enum'
+import { TaskResponseDto } from './dto/task-response.dto'
+import { AllTasksResponseDto } from './dto/all-tasks-response.dto'
+import { ApiService } from '../shared/ApiService'
 
 @Injectable()
 export class TasksService {
@@ -19,14 +22,15 @@ export class TasksService {
         private loggerService: LoggerService,
         private taskRepository: TaskRepository,
         private userRepository: UserRepository,
-        private projectRepository: ProjectRepository
+        private projectRepository: ProjectRepository,
+        private apiService: ApiService
     ) {}
 
     async getAllTasks(filterDto: GetTasksFilterDto) {
         return this.taskRepository.find()
     }
 
-    async getFilteredByUser(filterDto: GetTasksFilterDto, user: UserEntity){
+    async getFilteredByUser(filterDto: GetTasksFilterDto, user: UserEntity): Promise<TaskEntity[]>{
         return this.taskRepository.getFilteredByUser(filterDto, user)
     }
 
@@ -41,7 +45,13 @@ export class TasksService {
         return task
     }
 
-    async createTask(createTaskDto: CreateTaskDto, user: UserEntity, projectId: number):Promise<TaskEntity> {
+    async createTask(
+        createTaskDto: CreateTaskDto, 
+        user: UserEntity, 
+        projectId: number, 
+        ip: string, 
+        city: string
+    ):Promise<TaskEntity> {
 
         const project = await this.projectRepository.getById(projectId, user.id)
 
@@ -51,45 +61,69 @@ export class TasksService {
 
         const newTask = this.taskRepository.createTask(createTaskDto, user, project)
         const savedTask = await this.taskRepository.save(newTask)
+        const getCity = await this.apiService.getDataFromApi(ip)
 
-        await this.loggerService.writeLog(TaskLogActionTypes.create, user, savedTask)
+        await this.loggerService.writeLog(TaskLogActionTypes.create, user, savedTask, ip, getCity)
 
         return savedTask
     }
 
 
-    async deleteTask(id: number, user: UserEntity): Promise<void> {
-        const task = await this.taskRepository.getByIdOrFail(id, user)
-        const result = await this.taskRepository.softDelete({id, userId: user.id})
+    async deleteTask(
+        id: number, 
+        user: UserEntity, 
+        ip: string, 
+        city: string
+    ): Promise<void> {
+
+        const task = await this.taskRepository.getByIdOrFail(id, user.id)
+        const result = await this.taskRepository.softDelete({id, authorId: user.id})
 
         if(result.affected === 0) {
             throw new NotFoundException(`Task with id ${id} not found`)
         }
+        const getCity = await this.apiService.getDataFromApi(ip)
 
-        await this.loggerService.writeLog(TaskLogActionTypes.delete, user, task)
+        await this.loggerService.writeLog(TaskLogActionTypes.delete, user, task, ip, getCity)
     }
 
 
-    async updateTaskStatus(id: number, status: TaskStatus, user: UserEntity): Promise<TaskEntity> {
+    async updateTaskStatus(id: number, status: TaskStatus, user: UserEntity, ip: string, city: string): Promise<TaskEntity> {
 
-        const task = await this.taskRepository.getByIdOrFail(id, user)
+        const task = await this.taskRepository.getByIdOrFail(id, user.id)
         const taskStatuses = {
             old: task.status,
             new: status
         }
         task.status = status
         await task.save()
+        const getCity = await this.apiService.getDataFromApi(ip)
 
-        await this.loggerService.writeLog(TaskLogActionTypes.changeStatus, user, task, {taskStatuses})
+        await this.loggerService.writeLog(TaskLogActionTypes.changeStatus, user, task, ip, getCity, {taskStatuses})
         return task
     }
 
-    async assignUser(taskId: number, ownerUser: UserEntity, assignedUserId: number): Promise<TaskEntity> {
+    async assignUser(
+        taskId: number, 
+        ownerUser: UserEntity, 
+        assignedUserId: number, 
+        ip: string, 
+        city: string
+    ): Promise<TaskEntity> {
 
-        const task = await this.taskRepository.getByIdOrFail(taskId, ownerUser)
+        const task = await this.taskRepository.getByIdOrFail(taskId, ownerUser.id)
         task.assignedUser = await this.userRepository.findOne(assignedUserId)
+
+        const getCity = await this.apiService.getDataFromApi(ip)
     
-        await this.loggerService.writeLog(TaskLogActionTypes.assignUser, ownerUser, task, {assignedUserId})
+        await this.loggerService.writeLog(
+            TaskLogActionTypes.assignUser, 
+            ownerUser, 
+            task, 
+            ip, 
+            getCity, 
+            {assignedUserId}
+        )
 
         return await task.save()
     }

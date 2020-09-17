@@ -12,6 +12,7 @@ import { ProjectRepository } from '../projects/project.repository'
 import { LogsRepository } from 'src/logger/logger.repository'
 
 import { AuthModule } from '../auth/auth.module'
+import { ApiService } from 'src/shared/ApiService'
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { AuthModule } from '../auth/auth.module'
     AuthModule
   ],
   controllers: [TasksController],
-  providers: [TasksService, LoggerService]
+  providers: [TasksService, LoggerService, ApiService]
 })
 export class TasksModule {}

@@ -4,14 +4,12 @@ import { AuthGuard } from '@nestjs/passport';
 import { ProjectService } from './project.service';
 
 import { CreateProjectDto } from './dto/create-project.dto';
-import { ProjectResponseDto } from './dto/project-response.dto';
+import { LogResponseDto } from 'src/logger/dto/log-response.dto';
 
 import { GetUser } from 'src/auth/get-user.decorator';
 
 import { UserEntity } from 'src/auth/user.entity';
 import { ProjectEntity } from './project.entity';
-import { LogResponseDto } from 'src/logger/dto/log-response.dto';
-import { LoggerService } from 'src/logger/logger.service';
 
 @Controller('projects')
 @UseGuards(AuthGuard())

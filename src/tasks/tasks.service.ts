@@ -1,20 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
+import * as moment from 'moment'
 
 import { TaskRepository } from './task.repository'
 import { UserRepository } from 'src/auth/user.repository'
 import { ProjectRepository } from 'src/projects/project.repository'
+import { TrackerRepository } from 'src/tracker/tracker.repository'
 
 import { TaskEntity } from './task.entity'
 import { UserEntity } from 'src/auth/user.entity'
+import { TrackerEntity } from 'src/tracker/tracker.entity'
+
+import { LoggerService } from '../logger/logger.service'
 
 import { CreateTaskDto } from './dto/create-task.dto'
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto'
+
 import { TaskStatus } from './task-status.enum'
-import { LoggerService } from '../logger/logger.service'
 import { TaskLogActionTypes } from 'src/logger/task-logs.enum'
-import { TaskResponseDto } from './dto/task-response.dto'
-import { AllTasksResponseDto } from './dto/all-tasks-response.dto'
-import { ApiService } from '../shared/ApiService'
+
 
 @Injectable()
 export class TasksService {
@@ -23,7 +26,7 @@ export class TasksService {
         private taskRepository: TaskRepository,
         private userRepository: UserRepository,
         private projectRepository: ProjectRepository,
-        private apiService: ApiService
+        private trackerRepository: TrackerRepository,
     ) {}
 
     async getAllTasks(filterDto: GetTasksFilterDto) {
@@ -45,12 +48,13 @@ export class TasksService {
         return task
     }
 
+  
+
     async createTask(
         createTaskDto: CreateTaskDto, 
         user: UserEntity, 
         projectId: number, 
-        ip: string, 
-        city: string
+        ip: string,
     ):Promise<TaskEntity> {
 
         const project = await this.projectRepository.getById(projectId, user.id)
@@ -59,69 +63,122 @@ export class TasksService {
             throw new NotFoundException(`Project with id ${projectId} is not found`)
         }
 
+
         const newTask = this.taskRepository.createTask(createTaskDto, user, project)
         const savedTask = await this.taskRepository.save(newTask)
-        const getCity = await this.apiService.getDataFromApi(ip)
 
-        await this.loggerService.writeLog(TaskLogActionTypes.create, user, savedTask, ip, getCity)
+        const newTracker = this.trackerRepository.create({task: newTask})
+        await this.trackerRepository.save(newTracker)
+
+        this.loggerService.writeLog(TaskLogActionTypes.create, user.id, savedTask.id, ip)
 
         return savedTask
+    }
+
+    async startTracker(taskId: number, userId: number, ip: string): Promise<TrackerEntity> {
+        
+        const tracker = await this.trackerRepository.getTrackerByTaskId(taskId, userId)
+
+        if(tracker.isActive){
+            throw new Error('task is active')
+        } 
+        
+        tracker.startDate = moment().toDate()
+        tracker.isActive = true
+
+        this.loggerService.writeLog(
+            TaskLogActionTypes.startTracked, 
+            userId, 
+            taskId, 
+            ip,
+            {startTrackingDate: tracker.startDate})
+
+        return this.trackerRepository.save(tracker)
+    }
+
+    async stopTracker(taskId: number, userId: number, ip: string): Promise<TrackerEntity> {
+
+        const tracker = await this.trackerRepository.getTrackerByTaskId(taskId, userId)
+
+        if(!tracker.isActive){
+            throw new Error('task is no active')
+        }
+
+        const currentTimeMoment = moment()
+        const startTimeMoment = moment(tracker.startDate)
+        const difference = currentTimeMoment.diff(startTimeMoment)
+        
+        tracker.tracked = difference
+        tracker.isActive = false
+
+        console.log('tracked out', tracker.tracked)
+        this.loggerService.writeLog(
+            TaskLogActionTypes.stopTracked, 
+            userId, 
+            taskId, 
+            ip,
+            {trackedTime: tracker.tracked})
+
+        return this.trackerRepository.save(tracker)
     }
 
 
     async deleteTask(
         id: number, 
-        user: UserEntity, 
-        ip: string, 
-        city: string
+        userId: number, 
+        ip: string
     ): Promise<void> {
 
-        const task = await this.taskRepository.getByIdOrFail(id, user.id)
-        const result = await this.taskRepository.softDelete({id, authorId: user.id})
+        const task = await this.taskRepository.getByIdOrFail(id, userId)
+        const result = await this.taskRepository.softDelete({id, authorId: userId})
 
         if(result.affected === 0) {
             throw new NotFoundException(`Task with id ${id} not found`)
         }
-        const getCity = await this.apiService.getDataFromApi(ip)
 
-        await this.loggerService.writeLog(TaskLogActionTypes.delete, user, task, ip, getCity)
+        this.loggerService.writeLog(TaskLogActionTypes.delete, userId, task.id, ip)
     }
 
 
-    async updateTaskStatus(id: number, status: TaskStatus, user: UserEntity, ip: string, city: string): Promise<TaskEntity> {
+    async updateTaskStatus(
+        id: number, 
+        status: TaskStatus, 
+        userId: number, 
+        ip: string
+    ): Promise<TaskEntity> {
 
-        const task = await this.taskRepository.getByIdOrFail(id, user.id)
+        const task = await this.taskRepository.getByIdOrFail(id, userId)
         const taskStatuses = {
             old: task.status,
             new: status
         }
         task.status = status
         await task.save()
-        const getCity = await this.apiService.getDataFromApi(ip)
 
-        await this.loggerService.writeLog(TaskLogActionTypes.changeStatus, user, task, ip, getCity, {taskStatuses})
+        this.loggerService.writeLog(
+            TaskLogActionTypes.changeStatus, 
+            userId, 
+            task.id, 
+            ip, 
+            {taskStatuses})
         return task
     }
 
     async assignUser(
         taskId: number, 
-        ownerUser: UserEntity, 
+        ownerUserId: number, 
         assignedUserId: number, 
         ip: string, 
-        city: string
     ): Promise<TaskEntity> {
 
-        const task = await this.taskRepository.getByIdOrFail(taskId, ownerUser.id)
+        const task = await this.taskRepository.getByIdOrFail(taskId, ownerUserId)
         task.assignedUser = await this.userRepository.findOne(assignedUserId)
-
-        const getCity = await this.apiService.getDataFromApi(ip)
     
         await this.loggerService.writeLog(
             TaskLogActionTypes.assignUser, 
-            ownerUser, 
-            task, 
+            ownerUserId, 
+            task.id, 
             ip, 
-            getCity, 
             {assignedUserId}
         )
 

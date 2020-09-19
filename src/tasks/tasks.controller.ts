@@ -16,6 +16,9 @@ import { AllTasksResponseDto } from './dto/all-tasks-response.dto'
 import { TaskStatus } from './task-status.enum'
 
 import { GetUser } from '../auth/get-user.decorator'
+import { TrackerEntity } from 'src/tracker/tracker.entity'
+import { TrackerResponseDto } from 'src/tracker/dto/tracker-response.dto'
+import { TrackerRepository } from 'src/tracker/tracker.repository'
 
 
 @Controller('tasks')
@@ -60,25 +63,49 @@ export class TasksController {
         @Body('projectId') project: number,
         @Ip() ipAddress: string,
         @GetUser() user: UserEntity,
-        city: string
     ):Promise<TaskEntity> {
-        const getcity = await this.apiService.getDataFromApi(ipAddress)
-        console.log('city -> ', getcity)
-        return await this.tasksService.createTask(createTaskDto, user, project, ipAddress, city)
+        console.time('task')
+
+        const task =  await this.tasksService.createTask(createTaskDto, user, project, ipAddress)
+
+        console.timeEnd('task')
+        return task
     }
-     
+
+    @Post('/start-tracker/:id')
+    @UsePipes(ValidationPipe)
+    async startTracker(
+        @GetUser() user: UserEntity, 
+        @Param('id', ParseIntPipe) taskId: number,
+        @Ip() ipAddress: string
+    ): Promise<TrackerResponseDto> {
+
+        const start = await this.tasksService.startTracker(taskId, user.id, ipAddress)
+
+        return new TrackerResponseDto(start)
+    }
+
+    @Post('/stop-tracker/:id')
+    @UsePipes(ValidationPipe)
+    async stopTracker(
+        @GetUser() user: UserEntity, 
+        @Param('id', ParseIntPipe) taskId: number,
+        @Ip() ipAddress: string
+    ): Promise<TrackerResponseDto> {
+
+        const start = await this.tasksService.stopTracker(taskId, user.id, ipAddress)
+
+        return new TrackerResponseDto(start)
+    }
+
     @Delete('/:id')
     async deleteTask(
         @Param('id', ParseIntPipe) id: number, 
         @GetUser() user: UserEntity,
-        @Ip() ipAddress: string,
-        city: string
+        @Ip() ipAddress: string
     ): Promise<void>{
-        console.log('ip -> ', ipAddress)
-
-        const getcity = await this.apiService.getDataFromApi(ipAddress)
-        return await this.tasksService.deleteTask(id, user, ipAddress, getcity)
-
+       
+        return await this.tasksService.deleteTask(id, user.id, ipAddress)
     }
 
     @Patch('/:id/status')
@@ -86,11 +113,10 @@ export class TasksController {
         @Param('id', ParseIntPipe) id: number,
         @Body('status', TaskStatusValidationPipe) status: TaskStatus,
         @Ip() ipAddress: string,
-        @GetUser() user: UserEntity,
-        city: string
+        @GetUser() user: UserEntity
     ):
         Promise<TaskEntity> {
-        return this.tasksService.updateTaskStatus(id, status, user, ipAddress,city)
+        return this.tasksService.updateTaskStatus(id, status, user.id, ipAddress)
     }
 
     @Patch('/:id/assign')
@@ -101,9 +127,7 @@ export class TasksController {
         @GetUser() user: UserEntity, 
     ): Promise<TaskEntity>{
 
-        const getcity = await this.apiService.getDataFromApi(ipAddress)
-        console.log('city' , getcity)
-        return this.tasksService.assignUser(id, user, userId, ipAddress, getcity)
+        return this.tasksService.assignUser(id, user.id, userId, ipAddress)
     }
        
 }

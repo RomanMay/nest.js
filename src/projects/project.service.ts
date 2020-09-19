@@ -2,15 +2,13 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 
 import { UserRepository } from "../auth/user.repository";
 import { ProjectRepository } from "./project.repository";
+import { LogsRepository } from "src/logger/logger.repository";
 
 import { CreateProjectDto } from "./dto/create-project.dto";
 
 import { UserEntity } from "../auth/user.entity";
 import { ProjectEntity } from "./project.entity";
-import { ProjectResponseDto } from "./dto/project-response.dto";
-import { LogResponseDto } from "src/logger/dto/log-response.dto";
 import { LogEntity } from "src/logger/logs.entity";
-import { LogsRepository } from "src/logger/logger.repository";
 
 
 @Injectable()

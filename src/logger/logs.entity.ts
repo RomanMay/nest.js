@@ -14,8 +14,7 @@ export class LogEntity extends BaseEntity {
     @Column()
     actionMessage: string
 
-    @Column()
-    affectedUserId: number
+
 
     @Column({nullable: true})
     city: string
@@ -26,6 +25,12 @@ export class LogEntity extends BaseEntity {
     @ManyToOne(user => UserEntity, user => user.logs)
     affectedUser: UserEntity
 
+    @Column()
+    affectedUserId: number
+
     @ManyToOne(task => TaskEntity, task => task.logs)
     task: TaskEntity
+
+    @Column()
+    taskId: number
 }

@@ -1,6 +1,8 @@
 import { UserResponseDto } from "src/auth/dto/user-response.dto";
 import { LogResponseDto } from "src/logger/dto/log-response.dto";
+
 import { TaskStatus } from "../task-status.enum";
+
 import { TaskEntity } from "../task.entity";
 
 export class TaskResponseDto {

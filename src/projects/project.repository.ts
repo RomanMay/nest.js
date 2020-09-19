@@ -2,13 +2,11 @@ import { EntityRepository, Repository } from 'typeorm';
 
 import { ProjectEntity } from './project.entity';
 import { UserEntity } from '../auth/user.entity';
+import { LogEntity } from 'src/logger/logs.entity';
+import { TaskEntity } from 'src/tasks/task.entity';
 
 import { CreateProjectDto } from './dto/create-project.dto';
-import { ProjectResponseDto } from './dto/project-response.dto';
-import { LogResponseDto } from 'src/logger/dto/log-response.dto';
-import { LogEntity } from 'src/logger/logs.entity';
-import { TasksModule } from 'src/tasks/tasks.module';
-import { TaskEntity } from 'src/tasks/task.entity';
+
 
 @EntityRepository(ProjectEntity)
 export class ProjectRepository extends Repository<ProjectEntity> {

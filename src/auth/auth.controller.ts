@@ -2,13 +2,13 @@ import { Controller, Post, Body, ValidationPipe, UseGuards, Req, ParseIntPipe, G
 import { AuthGuard } from '@nestjs/passport'
 
 import { AuthCredentialDto } from './dto/auth-credentials.dto'
+import { UserResponseDto } from './dto/user-response.dto'
 
 import { AuthService } from './auth.service'
 
 import { GetUser } from './get-user.decorator'
 
 import { UserEntity } from './user.entity'
-import { UserResponseDto } from './dto/user-response.dto'
 
 @Controller('auth')
 export class AuthController {

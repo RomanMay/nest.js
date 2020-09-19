@@ -1,7 +1,10 @@
 import { UserResponseDto } from "../../auth/dto/user-response.dto"
+
 import { ProjectEntity } from "../../projects/project.entity"
-import { TaskStatus } from "../task-status.enum"
 import { TaskEntity } from "../task.entity"
+
+import { TaskStatus } from "../task-status.enum"
+
 
 export class AllTasksResponseDto {
 

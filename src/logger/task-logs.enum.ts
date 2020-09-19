@@ -1,6 +1,9 @@
 export enum TaskLogActionTypes {
     create = 'task created',
     changeStatus = 'changed task status',
-    assignUser = ' new user assigned to task: ',
+    assignUser = 'new user assigned to task: ',
     delete = 'task deleted',
+    startTracked = 'start tracking at:',
+    stopTracked = 'tracked:',
+
 }

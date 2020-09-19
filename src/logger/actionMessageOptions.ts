@@ -6,4 +6,6 @@ class TaskStatuses {
 export class ActionMessageOptions {
     taskStatuses?: TaskStatuses
     assignedUserId?: number
+    startTrackingDate?: Date
+    trackedTime?: number
  }

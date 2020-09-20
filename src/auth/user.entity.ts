@@ -5,10 +5,10 @@ import { TaskEntity } from '../tasks/task.entity'
 import { ProjectEntity } from '../projects/project.entity'
 import { LogEntity } from '../logger/logs.entity'
 
-@Entity({name: 'user'})
+@Entity({ name: 'user' })
 @Unique(['username'])
 export class UserEntity extends BaseEntity {
-    
+
     @PrimaryGeneratedColumn()
     id: number
 
@@ -21,16 +21,16 @@ export class UserEntity extends BaseEntity {
     @Column()
     salt: string
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     avatar: string
-    
-    @OneToMany(type => TaskEntity, task => task.author, {eager: true})
+
+    @OneToMany(type => TaskEntity, task => task.author, { eager: true })
     tasks: TaskEntity[]
-    
-    @OneToMany(type => TaskEntity, task => task.assignedUser, {eager: true})
+
+    @OneToMany(type => TaskEntity, task => task.assignedUser, { eager: true })
     assignedTasks: TaskEntity[]
-    
-    @ManyToMany(type => ProjectEntity, project => project.users, {cascade: true})
+
+    @ManyToMany(type => ProjectEntity, project => project.users, { cascade: true })
     @JoinTable()
     projects: ProjectEntity[]
 

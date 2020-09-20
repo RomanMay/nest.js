@@ -17,9 +17,9 @@ import { TasksModule } from '../tasks/tasks.module';
 @Module({
     imports: [
         TypeOrmModule.forFeature([
-            TaskRepository, 
-            UserRepository, 
-            ProjectRepository, 
+            TaskRepository,
+            UserRepository,
+            ProjectRepository,
             LogsRepository,
         ]),
         AuthModule,
@@ -28,4 +28,4 @@ import { TasksModule } from '../tasks/tasks.module';
     controllers: [ProjectController],
     providers: [ProjectService],
 })
-export class ProjectModule {};
+export class ProjectModule { };

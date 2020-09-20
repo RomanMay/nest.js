@@ -29,10 +29,10 @@ export class AllTasksResponseDto {
         this.status = task.status
         this.author = new UserResponseDto(task.author)
 
-        if(task.assignedUser){
+        if (task.assignedUser) {
             this.assignedUser = new UserResponseDto(task.assignedUser)
         }
-        
+
         this.project = task.project
     }
 }

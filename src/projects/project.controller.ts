@@ -15,34 +15,34 @@ import { ProjectEntity } from './project.entity';
 @UseGuards(AuthGuard())
 export class ProjectController {
 
-    constructor(private projectService: ProjectService){}
+    constructor(private projectService: ProjectService) { }
 
     @Post()
     @UsePipes(ValidationPipe)
     creteProject(
-        @Body() CreateProjectDto: CreateProjectDto, 
+        @Body() CreateProjectDto: CreateProjectDto,
         @GetUser() user: UserEntity
-    ): Promise<ProjectEntity>{
+    ): Promise<ProjectEntity> {
         return this.projectService.createProject(CreateProjectDto, user)
     }
 
     @Get('/:id')
-    async getLogs( 
-        @Param('id', ParseIntPipe) id: number, 
+    async getLogs(
+        @Param('id', ParseIntPipe) id: number,
         @GetUser() user: UserEntity,
         @Req() req
 
     ): Promise<LogResponseDto[]> {
         console.log(req.ip)
-        const logs = await this.projectService.getLogs(id,user)
-        return logs.map(proj => {return new LogResponseDto(proj)})
+        const logs = await this.projectService.getLogs(id, user)
+        return logs.map(proj => { return new LogResponseDto(proj) })
     }
 
     @Patch('/:id/assign')
     assignUser(
-        @Param('id', ParseIntPipe) id: number, 
-        @Body('assignedUser') userId: number, 
-        @GetUser() user: UserEntity): Promise<ProjectEntity>{
+        @Param('id', ParseIntPipe) id: number,
+        @Body('assignedUser') userId: number,
+        @GetUser() user: UserEntity): Promise<ProjectEntity> {
         return this.projectService.addUserToProject(id, user, userId)
     }
 }

@@ -8,4 +8,4 @@ export class ActionMessageOptions {
     assignedUserId?: number
     startTrackingDate?: Date
     trackedTime?: number
- }
+}

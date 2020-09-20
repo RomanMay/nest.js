@@ -2,23 +2,23 @@ import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "ty
 
 import { TaskEntity } from "../tasks/task.entity";
 
-@Entity({name: 'tracker'})
+@Entity({ name: 'tracker' })
 export class TrackerEntity {
 
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column({nullable:true})
+    @Column({ nullable: true })
     startDate: Date
 
-    @Column({default: false})
+    @Column({ default: false })
     isActive: boolean
 
-    @Column({nullable:true})
+    @Column({ nullable: true })
     tracked: number
 
     @OneToOne(type => TaskEntity, task => task.tracker)
     @JoinColumn()
     task: TaskEntity
-    
+
 }

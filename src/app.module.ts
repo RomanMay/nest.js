@@ -17,4 +17,4 @@ import { ProjectModule } from './projects/project.module'
   ],
 
 })
-export class AppModule {}
+export class AppModule { }

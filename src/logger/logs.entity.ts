@@ -3,22 +3,22 @@ import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGenerat
 import { TaskEntity } from "../tasks/task.entity";
 import { UserEntity } from "../auth/user.entity";
 
-@Entity({name : 'log'})
+@Entity({ name: 'log' })
 export class LogEntity extends BaseEntity {
 
     @PrimaryGeneratedColumn()
     id: number
 
-    @CreateDateColumn({type: 'time without time zone'})
+    @CreateDateColumn({ type: 'time without time zone' })
     createdAt: Date
 
     @Column()
     actionMessage: string
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     city: string
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     ip: string
 
     @ManyToOne(user => UserEntity, user => user.logs)

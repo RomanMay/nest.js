@@ -13,17 +13,17 @@ export class TaskRepository extends Repository<TaskEntity> {
 
     async getFilteredByUser(filterDto: GetTasksFilterDto, user: UserEntity): Promise<TaskEntity[]> {
 
-        const {status} = filterDto
+        const { status } = filterDto
 
         const query = this.createQueryBuilder("task")
         query
             .leftJoinAndSelect('task.project', 'project')
-            .leftJoinAndSelect('task.author',  'author')
+            .leftJoinAndSelect('task.author', 'author')
             .leftJoinAndSelect('task.assignedUser', 'assignedUser')
-            .where('task.authorId = :userId OR task."assignedUserId" = :userId', {userId: user.id})
+            .where('task.authorId = :userId OR task."assignedUserId" = :userId', { userId: user.id })
 
-        if(status) {
-            query.andWhere('task.status = :status', {status})
+        if (status) {
+            query.andWhere('task.status = :status', { status })
         }
 
         return query.getMany()
@@ -32,33 +32,33 @@ export class TaskRepository extends Repository<TaskEntity> {
 
     createTask(createTaskDto: CreateTaskDto, author: UserEntity, project: ProjectEntity) {
 
-        const {title, description} = createTaskDto
+        const { title, description } = createTaskDto
 
         return this.create({
             title,
             description,
             author,
             project,
-            
+
         })
     }
 
-    async getFullInformationById(taskId: number, userId: number): Promise<TaskEntity>{
+    async getFullInformationById(taskId: number, userId: number): Promise<TaskEntity> {
         return this.createQueryBuilder("task")
             .leftJoinAndSelect('task.logs', 'logs')
             .leftJoinAndSelect('task.author', 'user')
-            .where('task.id = :taskId' , {taskId})
-            .andWhere('(task.assignedUser = :userId OR task.authorId = :userId)', {userId})
+            .where('task.id = :taskId', { taskId })
+            .andWhere('(task.assignedUser = :userId OR task.authorId = :userId)', { userId })
             .getOne()
     }
 
-    async getByIdOrFail(taskId: number, userId: number): Promise<TaskEntity>{
+    async getByIdOrFail(taskId: number, userId: number): Promise<TaskEntity> {
         const task = this.createQueryBuilder("task")
-            .where('task.id = :taskId' , {taskId})
-            .andWhere('(task.assignedUser = :userId OR task.authorId = :userId)', {userId})
+            .where('task.id = :taskId', { taskId })
+            .andWhere('(task.assignedUser = :userId OR task.authorId = :userId)', { userId })
             .getOne()
 
-        if(!task) {
+        if (!task) {
             throw new NotFoundException(`Task with id ${taskId} is not found`)
         }
         return task

@@ -1,12 +1,12 @@
 import { TrackerEntity } from "../tracker.entity"
 
-export class TrackerResponseDto{
+export class TrackerResponseDto {
     id: number
 
     startDate: Date
-    
+
     isActive: boolean
-    
+
     tracked: number
 
     constructor(tracker: TrackerEntity) {

@@ -16,34 +16,34 @@ export class LoggerService {
     constructor(
         private logRepository: LogsRepository,
         private apiService: ApiService
-    ){}
+    ) { }
 
     async writeLog(actionType: TaskLogActionTypes,
         affectedUserId: number,
         taskId: number,
         ip: string,
         options?: ActionMessageOptions,
-        
-        ){
 
-            const actionMessage = this.buildActionMessage(actionType, options)
+    ) {
 
-            const city = await this.apiService.getDataFromApi(ip)
+        const actionMessage = this.buildActionMessage(actionType, options)
 
-            const newLog = this.logRepository.create({
-                actionMessage,
-                affectedUserId,
-                taskId,
-                city,
-                ip
-                
-            })
+        const city = await this.apiService.getDataFromApi(ip)
+
+        const newLog = this.logRepository.create({
+            actionMessage,
+            affectedUserId,
+            taskId,
+            city,
+            ip
+
+        })
 
         return this.logRepository.save(newLog)
     }
 
-    buildActionMessage(actionType: TaskLogActionTypes, option?: ActionMessageOptions): string{
-        switch(actionType){
+    buildActionMessage(actionType: TaskLogActionTypes, option?: ActionMessageOptions): string {
+        switch (actionType) {
             case TaskLogActionTypes.changeStatus:
                 return `${actionType} from ${option.taskStatuses.old} to ${option.taskStatuses.new}`
             case TaskLogActionTypes.assignUser:

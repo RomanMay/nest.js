@@ -13,26 +13,26 @@ import { LogEntity } from "src/logger/logs.entity";
 
 @Injectable()
 export class ProjectService {
-    
+
     constructor(
         private userRepository: UserRepository,
         private projectRepository: ProjectRepository,
         private loggerRepository: LogsRepository,
-    ){}
+    ) { }
 
     async createProject(createProjectDto: CreateProjectDto, user: UserEntity): Promise<ProjectEntity> {
-        const project = await this.projectRepository.createProject(createProjectDto, user) 
+        const project = await this.projectRepository.createProject(createProjectDto, user)
         return project
     }
 
-    async getProjectById(id: number, user: UserEntity): Promise<ProjectEntity>{
+    async getProjectById(id: number, user: UserEntity): Promise<ProjectEntity> {
         const proj = await this.projectRepository.getById(id, user.id)
 
-        if(!proj){
+        if (!proj) {
             throw new NotFoundException(`Project with id ${id} is not found`)
         }
 
-        return proj 
+        return proj
     }
 
     async getLogsOld(projectId: number, user: UserEntity): Promise<LogEntity[]> {
@@ -42,24 +42,24 @@ export class ProjectService {
 
     async getLogs(projectId: number, user: UserEntity): Promise<LogEntity[]> {
         const project = await this.projectRepository.getById(projectId, user.id)
-        if(!project) { 
+        if (!project) {
             throw new Error('kek')
-        }        
+        }
 
         return this.loggerRepository.getLogs(projectId)
     }
 
 
     async addUserToProject(projectId: number, user: UserEntity, assignedUserId: number): Promise<ProjectEntity> {
- 
-        const project = await this.getProjectById(projectId,user)
-        const targetUser = await this.userRepository.findOne({where: {id: assignedUserId}})
 
-        project.users.push(targetUser) 
+        const project = await this.getProjectById(projectId, user)
+        const targetUser = await this.userRepository.findOne({ where: { id: assignedUserId } })
+
+        project.users.push(targetUser)
 
         return this.projectRepository.save(project)
 
-        
+
     }
 
 }

@@ -10,4 +10,4 @@ import { TrackerRepository } from "./tracker.repository";
     ]
 })
 
-export class TrackerModule{}
+export class TrackerModule { }

@@ -16,28 +16,28 @@ export class AuthService {
     constructor(
         @InjectRepository(UserRepository)
         private userRepository: UserRepository,
-        private jwtService : JwtService
-    ) {}
-    
-    async signUp(authCredentialDto: AuthCredentialDto): Promise<void>{
+        private jwtService: JwtService
+    ) { }
+
+    async signUp(authCredentialDto: AuthCredentialDto): Promise<void> {
         return this.userRepository.signUp(authCredentialDto)
     }
 
-    async signIn(authCredentialDto: AuthCredentialDto): Promise<{accessToken: string}> {
+    async signIn(authCredentialDto: AuthCredentialDto): Promise<{ accessToken: string }> {
         const username = await this.userRepository.validateUserPassword(authCredentialDto)
-        if(!username) {
+        if (!username) {
             throw new UnauthorizedException('Invalid credentials')
         }
 
-        const payload: JwtPayload = {username}
+        const payload: JwtPayload = { username }
         const accessToken = await this.jwtService.sign(payload)
 
-        return {accessToken}
+        return { accessToken }
     }
 
     async getUserById(id: number, user: UserEntity): Promise<UserEntity> {
-        const foundUser = await this.userRepository.findOne({where: {id: user.id}})
+        const foundUser = await this.userRepository.findOne({ where: { id: user.id } })
         return foundUser
     }
-    
+
 }

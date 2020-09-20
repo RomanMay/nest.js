@@ -20,7 +20,7 @@ export class TaskResponseDto {
     logs: LogResponseDto[]
 
 
-    constructor(task: TaskEntity){
+    constructor(task: TaskEntity) {
         this.id = task.id
         this.title = task.title
         this.description = task.description

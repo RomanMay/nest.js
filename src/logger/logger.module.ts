@@ -9,12 +9,11 @@ import { TasksModule } from "../tasks/tasks.module";
 import { LoggerService } from "./logger.service";
 
 @Module({
-    imports:[
+    imports: [
         TypeOrmModule.forFeature([LogsRepository, ProjectRepository]),
         TasksModule
     ],
-    providers:[LoggerService]
+    providers: [LoggerService]
 })
 
-export class LoggerModule {}
-    
+export class LoggerModule { }

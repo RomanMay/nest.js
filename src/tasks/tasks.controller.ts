@@ -21,47 +21,47 @@ import { GetUser } from '../auth/get-user.decorator'
 @UseGuards(AuthGuard())
 export class TasksController {
 
-    constructor(private tasksService: TasksService) {}    
-    
+    constructor(private tasksService: TasksService) { }
+
     @Get('/all')
-    getAllTasks(filterDto: GetTasksFilterDto){
+    getAllTasks(filterDto: GetTasksFilterDto) {
 
         return this.tasksService.getAllTasks(filterDto)
     }
 
     @Get('/usertasks')
-    async getTasks( 
+    async getTasks(
         @Query(ValidationPipe) filterDto: GetTasksFilterDto,
         @GetUser() user: UserEntity,
-    ):Promise<AllTasksResponseDto[]> {
-        
+    ): Promise<AllTasksResponseDto[]> {
+
         const allTasks = await this.tasksService.getFilteredByUser(filterDto, user)
 
-        return allTasks.map(task => {return new AllTasksResponseDto(task)})
+        return allTasks.map(task => { return new AllTasksResponseDto(task) })
     }
 
     @Get('/:id')
     async getTaskById(
         @Param('id', ParseIntPipe) id: number,
         @GetUser() user: UserEntity
-    ):Promise<TaskResponseDto>{
-            
-            const task = await this.tasksService.getTaskById(id,user)
-        
-            return new TaskResponseDto(task)
+    ): Promise<TaskResponseDto> {
+
+        const task = await this.tasksService.getTaskById(id, user)
+
+        return new TaskResponseDto(task)
     }
 
     @Post()
     @UsePipes(ValidationPipe)
-    async createTask( 
+    async createTask(
         @Body() createTaskDto: CreateTaskDto,
         @Body('projectId') project: number,
         @Ip() ipAddress: string,
         @GetUser() user: UserEntity,
-    ):Promise<TaskEntity> {
+    ): Promise<TaskEntity> {
         console.time('task')
 
-        const task =  await this.tasksService.createTask(createTaskDto, user, project, ipAddress)
+        const task = await this.tasksService.createTask(createTaskDto, user, project, ipAddress)
 
         console.timeEnd('task')
         return task
@@ -70,7 +70,7 @@ export class TasksController {
     @Post('/start-tracker/:id')
     @UsePipes(ValidationPipe)
     async startTracker(
-        @GetUser() user: UserEntity, 
+        @GetUser() user: UserEntity,
         @Param('id', ParseIntPipe) taskId: number,
         @Ip() ipAddress: string
     ): Promise<TrackerResponseDto> {
@@ -83,7 +83,7 @@ export class TasksController {
     @Patch('/stop-tracker/:id')
     @UsePipes(ValidationPipe)
     async stopTracker(
-        @GetUser() user: UserEntity, 
+        @GetUser() user: UserEntity,
         @Param('id', ParseIntPipe) taskId: number,
         @Ip() ipAddress: string
     ): Promise<TrackerResponseDto> {
@@ -95,11 +95,11 @@ export class TasksController {
 
     @Delete('/:id')
     async deleteTask(
-        @Param('id', ParseIntPipe) id: number, 
+        @Param('id', ParseIntPipe) id: number,
         @GetUser() user: UserEntity,
         @Ip() ipAddress: string
-    ): Promise<void>{
-       
+    ): Promise<void> {
+
         return await this.tasksService.deleteTask(id, user.id, ipAddress)
     }
 
@@ -116,13 +116,13 @@ export class TasksController {
 
     @Patch('/:id/assign')
     async assignUser(
-        @Param('id', ParseIntPipe) id: number, 
+        @Param('id', ParseIntPipe) id: number,
         @Body('assignedUser') userId: number,
         @Ip() ipAddress: string,
-        @GetUser() user: UserEntity, 
-    ): Promise<TaskEntity>{
+        @GetUser() user: UserEntity,
+    ): Promise<TaskEntity> {
 
         return this.tasksService.assignUser(id, user.id, userId, ipAddress)
     }
-       
+
 }

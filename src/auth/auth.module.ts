@@ -35,4 +35,4 @@ const jwtConfig = config.get('jwt')
   ]
 
 })
-export class AuthModule {}
+export class AuthModule { }

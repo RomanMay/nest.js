@@ -18,14 +18,14 @@ import { TrackerRepository } from 'src/tracker/tracker.repository'
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      TaskRepository, 
-      UserRepository, 
-      ProjectRepository, 
-      LogsRepository, 
+      TaskRepository,
+      UserRepository,
+      ProjectRepository,
+      LogsRepository,
       TrackerRepository]),
     AuthModule
   ],
   controllers: [TasksController],
   providers: [TasksService, LoggerService, ApiService]
 })
-export class TasksModule {}
+export class TasksModule { }

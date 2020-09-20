@@ -3,14 +3,14 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTabl
 import { TaskEntity } from '../tasks/task.entity';
 import { UserEntity } from '../auth/user.entity';
 
-@Entity({name: 'project'})
+@Entity({ name: 'project' })
 export class ProjectEntity {
-    
+
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column()
-    name : string;
+    name: string;
 
     @OneToMany(type => TaskEntity, task => task.project)
     tasks: TaskEntity[]

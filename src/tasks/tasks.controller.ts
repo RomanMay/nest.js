@@ -3,7 +3,6 @@ import { TaskStatusValidationPipe } from './pipes/task-status-validation.pipe'
 import { AuthGuard } from '@nestjs/passport'
 
 import { TasksService } from './tasks.service'
-import {ApiService} from '../shared/ApiService'
 
 import { TaskEntity } from './task.entity'
 import { UserEntity } from '../auth/user.entity'
@@ -12,20 +11,17 @@ import { CreateTaskDto } from './dto/create-task.dto'
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto'
 import { TaskResponseDto } from './dto/task-response.dto'
 import { AllTasksResponseDto } from './dto/all-tasks-response.dto'
+import { TrackerResponseDto } from 'src/tracker/dto/tracker-response.dto'
 
 import { TaskStatus } from './task-status.enum'
 
 import { GetUser } from '../auth/get-user.decorator'
-import { TrackerEntity } from 'src/tracker/tracker.entity'
-import { TrackerResponseDto } from 'src/tracker/dto/tracker-response.dto'
-import { TrackerRepository } from 'src/tracker/tracker.repository'
-
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
 
-    constructor(private tasksService: TasksService, private apiService: ApiService) {}    
+    constructor(private tasksService: TasksService) {}    
     
     @Get('/all')
     getAllTasks(filterDto: GetTasksFilterDto){
@@ -37,7 +33,6 @@ export class TasksController {
     async getTasks( 
         @Query(ValidationPipe) filterDto: GetTasksFilterDto,
         @GetUser() user: UserEntity,
-        @Ip() ipAddress: string
     ):Promise<AllTasksResponseDto[]> {
         
         const allTasks = await this.tasksService.getFilteredByUser(filterDto, user)
@@ -85,7 +80,7 @@ export class TasksController {
         return new TrackerResponseDto(start)
     }
 
-    @Post('/stop-tracker/:id')
+    @Patch('/stop-tracker/:id')
     @UsePipes(ValidationPipe)
     async stopTracker(
         @GetUser() user: UserEntity, 

@@ -1,6 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { UserEntity } from "src/auth/user.entity";
-import { TaskEntity } from "src/tasks/task.entity";
 
 import { LogsRepository } from "./logger.repository";
 
@@ -14,12 +12,10 @@ import { ApiService } from "../shared/ApiService";
 
 @Injectable()
 export class LoggerService {
+
     constructor(
-        // private projectRepository: ProjectRepository,
         private logRepository: LogsRepository,
         private apiService: ApiService
-        
-
     ){}
 
     async writeLog(actionType: TaskLogActionTypes,
@@ -29,7 +25,6 @@ export class LoggerService {
         options?: ActionMessageOptions,
         
         ){
-            console.log('tracked in', options)
 
             const actionMessage = this.buildActionMessage(actionType, options)
 
@@ -46,14 +41,6 @@ export class LoggerService {
 
         return this.logRepository.save(newLog)
     }
-
-    // async getLogs(projectId: number, userId: number): Promise<LogEntity[]> {
-    //     // const project = this.projectRepository.getById(projectId, userId)
-    //     // if(!project) { 
-    //     //     throw new Error('kek')
-    //     // }
-    //     return this.logRepository.getLogs(projectId)
-    // }
 
     buildActionMessage(actionType: TaskLogActionTypes, option?: ActionMessageOptions): string{
         switch(actionType){

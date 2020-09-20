@@ -12,6 +12,7 @@ import { AuthService } from './auth.service'
 import { UserRepository } from './user.repository'
 
 const jwtConfig = config.get('jwt')
+
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),

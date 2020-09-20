@@ -21,6 +21,7 @@ import { TaskLogActionTypes } from 'src/logger/task-logs.enum'
 
 @Injectable()
 export class TasksService {
+
     constructor(
         private loggerService: LoggerService,
         private taskRepository: TaskRepository,
@@ -107,8 +108,9 @@ export class TasksService {
         const currentTimeMoment = moment()
         const startTimeMoment = moment(tracker.startDate)
         const difference = currentTimeMoment.diff(startTimeMoment)
+        const tracked = tracker.tracked + difference
         
-        tracker.tracked = difference
+        tracker.tracked = tracked
         tracker.isActive = false
 
         console.log('tracked out', tracker.tracked)
@@ -152,6 +154,7 @@ export class TasksService {
             old: task.status,
             new: status
         }
+        
         task.status = status
         await task.save()
 
@@ -161,6 +164,7 @@ export class TasksService {
             task.id, 
             ip, 
             {taskStatuses})
+
         return task
     }
 

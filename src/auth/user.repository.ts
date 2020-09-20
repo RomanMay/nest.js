@@ -8,8 +8,7 @@ import { AuthCredentialDto } from "./dto/auth-credentials.dto"
 
 @EntityRepository(UserEntity)
 export class UserRepository extends Repository<UserEntity> {
-   
-    private a(){}
+
     async signUp(authCredentialDto: AuthCredentialDto) {
         const { username, password} = authCredentialDto
 

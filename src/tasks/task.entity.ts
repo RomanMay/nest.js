@@ -9,6 +9,7 @@ import { TrackerEntity } from '../tracker/tracker.entity'
 
 @Entity({name: 'task'})
 export class TaskEntity extends BaseEntity {
+    
     @PrimaryGeneratedColumn()
     id: number
 

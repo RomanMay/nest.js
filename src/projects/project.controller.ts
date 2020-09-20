@@ -14,9 +14,8 @@ import { ProjectEntity } from './project.entity';
 @Controller('projects')
 @UseGuards(AuthGuard())
 export class ProjectController {
-    constructor(
-        private projectService: ProjectService,
-        ){}
+
+    constructor(private projectService: ProjectService){}
 
     @Post()
     @UsePipes(ValidationPipe)
@@ -27,16 +26,6 @@ export class ProjectController {
         return this.projectService.createProject(CreateProjectDto, user)
     }
 
-    // @Get('/:id')
-    // async getProjectByid(
-    //     @Param('id', ParseIntPipe) id: number, 
-    //     @GetUser() user: UserEntity
-    // ): Promise<ProjectResponseDto> {
-
-    //     const project = await this.projectService.getProjectById(id,user)
-    //     return new ProjectResponseDto(project)
-    // }
-
     @Get('/:id')
     async getLogs( 
         @Param('id', ParseIntPipe) id: number, 
@@ -46,7 +35,6 @@ export class ProjectController {
     ): Promise<LogResponseDto[]> {
         console.log(req.ip)
         const logs = await this.projectService.getLogs(id,user)
-        // const logs = await this.loggerService.getLogs(id,user.id)
         return logs.map(proj => {return new LogResponseDto(proj)})
     }
 

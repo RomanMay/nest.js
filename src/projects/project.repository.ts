@@ -10,6 +10,7 @@ import { CreateProjectDto } from './dto/create-project.dto';
 
 @EntityRepository(ProjectEntity)
 export class ProjectRepository extends Repository<ProjectEntity> {
+  
   async createProject(createProjectDto: CreateProjectDto, user: UserEntity){
       const {name} = createProjectDto
 

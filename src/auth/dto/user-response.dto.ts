@@ -1,6 +1,7 @@
 import { UserEntity } from "../user.entity"
 
 export class UserResponseDto {
+    
     id: number
 
     username: string

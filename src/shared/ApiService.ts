@@ -1,6 +1,7 @@
-import apiKey from "../../constants.js"
 import axios from "axios"
+
 export class ApiService {
+    
     apiKey: string
 
     constructor() {

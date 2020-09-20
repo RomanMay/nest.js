@@ -8,6 +8,7 @@ import { LogEntity } from '../logger/logs.entity'
 @Entity({name: 'user'})
 @Unique(['username'])
 export class UserEntity extends BaseEntity {
+    
     @PrimaryGeneratedColumn()
     id: number
 

@@ -5,6 +5,7 @@ import { UserEntity } from '../auth/user.entity';
 
 @Entity({name: 'project'})
 export class ProjectEntity {
+    
     @PrimaryGeneratedColumn()
     id: number;
 

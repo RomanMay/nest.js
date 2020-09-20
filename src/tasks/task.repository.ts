@@ -7,8 +7,6 @@ import { ProjectEntity } from 'src/projects/project.entity'
 
 import { CreateTaskDto } from './dto/create-task.dto'
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto'
-import { TrackerEntity } from 'src/tracker/tracker.entity'
-import { TrackerRepository } from 'src/tracker/tracker.repository'
 
 @EntityRepository(TaskEntity)
 export class TaskRepository extends Repository<TaskEntity> {

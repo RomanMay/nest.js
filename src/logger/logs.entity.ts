@@ -5,6 +5,7 @@ import { UserEntity } from "../auth/user.entity";
 
 @Entity({name : 'log'})
 export class LogEntity extends BaseEntity {
+
     @PrimaryGeneratedColumn()
     id: number
 
@@ -13,8 +14,6 @@ export class LogEntity extends BaseEntity {
 
     @Column()
     actionMessage: string
-
-
 
     @Column({nullable: true})
     city: string

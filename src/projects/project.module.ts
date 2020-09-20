@@ -16,7 +16,12 @@ import { TasksModule } from '../tasks/tasks.module';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([TaskRepository, UserRepository, ProjectRepository, LogsRepository]),
+        TypeOrmModule.forFeature([
+            TaskRepository, 
+            UserRepository, 
+            ProjectRepository, 
+            LogsRepository,
+        ]),
         AuthModule,
         TasksModule
     ],

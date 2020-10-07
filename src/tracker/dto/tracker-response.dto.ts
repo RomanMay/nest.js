@@ -1,3 +1,4 @@
+import * as moment from "moment"
 import { TrackerEntity } from "../tracker.entity"
 
 export class TrackerResponseDto {
@@ -12,6 +13,6 @@ export class TrackerResponseDto {
     constructor(tracker: TrackerEntity) {
         this.startDate = tracker.startDate
         this.isActive = tracker.isActive
-        this.tracked = tracker.tracked
+        this.tracked = moment.duration(tracker.tracked).minutes()
     }
 }

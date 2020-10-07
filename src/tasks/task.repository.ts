@@ -3,7 +3,6 @@ import { NotFoundException } from '@nestjs/common'
 
 import { TaskEntity } from './task.entity'
 import { UserEntity } from 'src/auth/user.entity'
-import { ProjectEntity } from 'src/projects/project.entity'
 
 import { CreateTaskDto } from './dto/create-task.dto'
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto'
@@ -30,16 +29,16 @@ export class TaskRepository extends Repository<TaskEntity> {
 
     }
 
-    createTask(createTaskDto: CreateTaskDto, author: UserEntity, project: ProjectEntity) {
+    createTask(createTaskDto: CreateTaskDto, author: UserEntity) {
 
-        const { title, description } = createTaskDto
+        const { title, description, projectId } = createTaskDto
 
         return this.create({
             title,
             description,
+            projectId,
             author,
-            project,
-
+            
         })
     }
 
@@ -47,6 +46,8 @@ export class TaskRepository extends Repository<TaskEntity> {
         return this.createQueryBuilder("task")
             .leftJoinAndSelect('task.logs', 'logs')
             .leftJoinAndSelect('task.author', 'user')
+            .leftJoinAndSelect('task.assignedUser', 'asuser')
+            .leftJoinAndSelect('task.tracker', 'tracker')
             .where('task.id = :taskId', { taskId })
             .andWhere('(task.assignedUser = :userId OR task.authorId = :userId)', { userId })
             .getOne()
@@ -54,6 +55,9 @@ export class TaskRepository extends Repository<TaskEntity> {
 
     async getByIdOrFail(taskId: number, userId: number): Promise<TaskEntity> {
         const task = this.createQueryBuilder("task")
+            .leftJoinAndSelect('task.tracker', 'tracker')
+            .leftJoinAndSelect('task.assignedUser', 'asuser')
+            .leftJoinAndSelect('task.author', 'user')
             .where('task.id = :taskId', { taskId })
             .andWhere('(task.assignedUser = :userId OR task.authorId = :userId)', { userId })
             .getOne()

@@ -16,7 +16,10 @@ import { TrackerResponseDto } from 'src/tracker/dto/tracker-response.dto'
 import { TaskStatus } from './task-status.enum'
 
 import { GetUser } from '../auth/get-user.decorator'
+import { ApiBearerAuth } from '@nestjs/swagger/dist/decorators/api-bearer.decorator'
+import { ApiBody } from '@nestjs/swagger'
 
+@ApiBearerAuth()
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
@@ -24,9 +27,9 @@ export class TasksController {
     constructor(private tasksService: TasksService) { }
 
     @Get('/all')
-    getAllTasks(filterDto: GetTasksFilterDto) {
+    getAllTasks(): Promise<TaskEntity[]> {
 
-        return this.tasksService.getAllTasks(filterDto)
+        return this.tasksService.getAllTasks()
     }
 
     @Get('/usertasks')
@@ -55,19 +58,18 @@ export class TasksController {
     @UsePipes(ValidationPipe)
     async createTask(
         @Body() createTaskDto: CreateTaskDto,
-        @Body('projectId') project: number,
         @Ip() ipAddress: string,
         @GetUser() user: UserEntity,
     ): Promise<TaskEntity> {
         console.time('task')
 
-        const task = await this.tasksService.createTask(createTaskDto, user, project, ipAddress)
+        const task = await this.tasksService.createTask(createTaskDto, user, ipAddress)
 
         console.timeEnd('task')
         return task
     }
 
-    @Post('/start-tracker/:id')
+    @Post('/:id/start-tracker')
     @UsePipes(ValidationPipe)
     async startTracker(
         @GetUser() user: UserEntity,
@@ -80,7 +82,7 @@ export class TasksController {
         return new TrackerResponseDto(start)
     }
 
-    @Patch('/stop-tracker/:id')
+    @Patch('/:id/stop-tracker')
     @UsePipes(ValidationPipe)
     async stopTracker(
         @GetUser() user: UserEntity,
@@ -103,10 +105,10 @@ export class TasksController {
         return await this.tasksService.deleteTask(id, user.id, ipAddress)
     }
 
-    @Patch('/:id/status')
+    @Patch('/:id/status/:status')
     updateTaskStatus(
         @Param('id', ParseIntPipe) id: number,
-        @Body('status', TaskStatusValidationPipe) status: TaskStatus,
+        @Param('status', TaskStatusValidationPipe)  status: TaskStatus,
         @Ip() ipAddress: string,
         @GetUser() user: UserEntity
     ):
@@ -114,15 +116,17 @@ export class TasksController {
         return this.tasksService.updateTaskStatus(id, status, user.id, ipAddress)
     }
 
-    @Patch('/:id/assign')
+    @Patch('/:id/assign/:assignedUserId')
     async assignUser(
         @Param('id', ParseIntPipe) id: number,
-        @Body('assignedUser') userId: number,
+        @Param('assignedUserId', ParseIntPipe) assignedUserId: number,
         @Ip() ipAddress: string,
         @GetUser() user: UserEntity,
-    ): Promise<TaskEntity> {
+    ): Promise<TaskResponseDto> {
 
-        return this.tasksService.assignUser(id, user.id, userId, ipAddress)
+        const taskWithAssignedUser = await this.tasksService.assignUser(id, user.id, assignedUserId, ipAddress)
+
+        return new TaskResponseDto(taskWithAssignedUser)
     }
 
 }

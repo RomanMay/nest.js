@@ -10,8 +10,10 @@ import { GetUser } from 'src/auth/get-user.decorator';
 
 import { UserEntity } from 'src/auth/user.entity';
 import { ProjectEntity } from './project.entity';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('projects')
+@ApiBearerAuth()
 @UseGuards(AuthGuard())
 export class ProjectController {
 
@@ -20,10 +22,10 @@ export class ProjectController {
     @Post()
     @UsePipes(ValidationPipe)
     creteProject(
-        @Body() CreateProjectDto: CreateProjectDto,
+        @Body() createProjectDto: CreateProjectDto,
         @GetUser() user: UserEntity
     ): Promise<ProjectEntity> {
-        return this.projectService.createProject(CreateProjectDto, user)
+        return this.projectService.createProject(createProjectDto, user)
     }
 
     @Get('/:id')
@@ -35,14 +37,15 @@ export class ProjectController {
     ): Promise<LogResponseDto[]> {
         console.log(req.ip)
         const logs = await this.projectService.getLogs(id, user)
-        return logs.map(proj => { return new LogResponseDto(proj) })
+        return logs.map(proj => new LogResponseDto(proj))
     }
 
     @Patch('/:id/assign')
     assignUser(
         @Param('id', ParseIntPipe) id: number,
         @Body('assignedUser') userId: number,
-        @GetUser() user: UserEntity): Promise<ProjectEntity> {
+        @GetUser() user: UserEntity
+    ): Promise<ProjectEntity> {
         return this.projectService.addUserToProject(id, user, userId)
     }
 }

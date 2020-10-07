@@ -2,13 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import * as moment from 'moment'
 
 import { TaskRepository } from './task.repository'
-import { UserRepository } from 'src/auth/user.repository'
-import { ProjectRepository } from 'src/projects/project.repository'
-import { TrackerRepository } from 'src/tracker/tracker.repository'
+import { UserRepository } from '../auth/user.repository'
+import { ProjectRepository } from '../projects/project.repository'
+import { TrackerRepository } from '../tracker/tracker.repository'
 
 import { TaskEntity } from './task.entity'
-import { UserEntity } from 'src/auth/user.entity'
-import { TrackerEntity } from 'src/tracker/tracker.entity'
+import { UserEntity } from '../auth/user.entity'
+import { TrackerEntity } from '../tracker/tracker.entity'
 
 import { LoggerService } from '../logger/logger.service'
 
@@ -16,7 +16,7 @@ import { CreateTaskDto } from './dto/create-task.dto'
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto'
 
 import { TaskStatus } from './task-status.enum'
-import { TaskLogActionTypes } from 'src/logger/task-logs.enum'
+import { TaskLogActionTypes } from '../logger/task-logs.enum'
 
 
 @Injectable()
@@ -30,7 +30,7 @@ export class TasksService {
         private trackerRepository: TrackerRepository,
     ) { }
 
-    async getAllTasks(filterDto: GetTasksFilterDto) {
+    async getAllTasks(): Promise<TaskEntity[]> {
         return this.taskRepository.find()
     }
 
@@ -50,22 +50,19 @@ export class TasksService {
     }
 
 
-
     async createTask(
         createTaskDto: CreateTaskDto,
         user: UserEntity,
-        projectId: number,
         ip: string,
     ): Promise<TaskEntity> {
 
-        const project = await this.projectRepository.getById(projectId, user.id)
+        const project = await this.projectRepository.getById(createTaskDto.projectId, user.id)
 
         if (!project) {
-            throw new NotFoundException(`Project with id ${projectId} is not found`)
+            throw new NotFoundException(`Project with id ${createTaskDto.projectId} is not found`)
         }
 
-
-        const newTask = this.taskRepository.createTask(createTaskDto, user, project)
+        const newTask = this.taskRepository.createTask(createTaskDto, user)
         const savedTask = await this.taskRepository.save(newTask)
 
         const newTracker = this.trackerRepository.create({ task: newTask })
@@ -92,7 +89,8 @@ export class TasksService {
             userId,
             taskId,
             ip,
-            { startTrackingDate: tracker.startDate })
+            { startTrackingDate: tracker.startDate }
+        )
 
         return this.trackerRepository.save(tracker)
     }
@@ -108,6 +106,7 @@ export class TasksService {
         const currentTimeMoment = moment()
         const startTimeMoment = moment(tracker.startDate)
         const difference = currentTimeMoment.diff(startTimeMoment)
+
         const tracked = tracker.tracked + difference
 
         tracker.tracked = tracked
@@ -119,7 +118,8 @@ export class TasksService {
             userId,
             taskId,
             ip,
-            { trackedTime: tracker.tracked })
+            { trackedTime: tracker.tracked }
+        )
 
         return this.trackerRepository.save(tracker)
     }
@@ -131,14 +131,13 @@ export class TasksService {
         ip: string
     ): Promise<void> {
 
-        const task = await this.taskRepository.getByIdOrFail(id, userId)
         const result = await this.taskRepository.softDelete({ id, authorId: userId })
 
         if (result.affected === 0) {
             throw new NotFoundException(`Task with id ${id} not found`)
         }
 
-        this.loggerService.writeLog(TaskLogActionTypes.delete, userId, task.id, ip)
+        this.loggerService.writeLog(TaskLogActionTypes.delete, userId, id, ip)
     }
 
 
@@ -150,20 +149,22 @@ export class TasksService {
     ): Promise<TaskEntity> {
 
         const task = await this.taskRepository.getByIdOrFail(id, userId)
+
         const taskStatuses = {
             old: task.status,
             new: status
         }
-
-        task.status = status
-        await task.save()
 
         this.loggerService.writeLog(
             TaskLogActionTypes.changeStatus,
             userId,
             task.id,
             ip,
-            { taskStatuses })
+            { taskStatuses }
+        )
+
+        task.status = status
+        await task.save()
 
         return task
     }
@@ -176,7 +177,10 @@ export class TasksService {
     ): Promise<TaskEntity> {
 
         const task = await this.taskRepository.getByIdOrFail(taskId, ownerUserId)
-        task.assignedUser = await this.userRepository.findOne(assignedUserId)
+        const assignedUser = await this.userRepository.findOne(assignedUserId)
+        task.assignedUserId = assignedUser.id
+        
+        console.log('task -> ', task)
 
         await this.loggerService.writeLog(
             TaskLogActionTypes.assignUser,
@@ -186,6 +190,6 @@ export class TasksService {
             { assignedUserId }
         )
 
-        return await task.save()
+        return task.save()
     }
 }

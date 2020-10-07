@@ -9,6 +9,9 @@ import { AuthService } from './auth.service'
 import { GetUser } from './get-user.decorator'
 
 import { UserEntity } from './user.entity'
+import { ApiBearerAuth } from '@nestjs/swagger/dist/decorators/api-bearer.decorator'
+import { ApiBody } from '@nestjs/swagger'
+import { type } from 'os'
 
 @Controller('auth')
 export class AuthController {
@@ -16,17 +19,22 @@ export class AuthController {
         private authService: AuthService
     ) { }
 
+
     @Post('/signup')
     signUp(@Body(ValidationPipe) authcredentialDto: AuthCredentialDto): Promise<void> {
         return this.authService.signUp(authcredentialDto)
     }
 
+
     @Post('/signin')
-    signIn(@Body(ValidationPipe) authcredentialDto: AuthCredentialDto): Promise<{ accessToken: string }> {
+    signIn(
+    @Body(ValidationPipe) authcredentialDto: AuthCredentialDto
+     ): Promise<{ accessToken: string }> {
         return this.authService.signIn(authcredentialDto)
     }
 
     @UseGuards(AuthGuard())
+    @ApiBearerAuth()
     @Get('/getUser/:id')
     async getUserById(
         @Param('id', ParseIntPipe) id: number,

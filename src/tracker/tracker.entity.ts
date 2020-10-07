@@ -14,7 +14,7 @@ export class TrackerEntity {
     @Column({ default: false })
     isActive: boolean
 
-    @Column({ nullable: true })
+    @Column({ default: 0 })
     tracked: number
 
     @OneToOne(type => TaskEntity, task => task.tracker)

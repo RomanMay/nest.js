@@ -1,5 +1,7 @@
 import { UserResponseDto } from "src/auth/dto/user-response.dto";
 import { LogResponseDto } from "src/logger/dto/log-response.dto";
+import { TrackerResponseDto } from "src/tracker/dto/tracker-response.dto";
+import { TrackerEntity } from "src/tracker/tracker.entity";
 
 import { TaskStatus } from "../task-status.enum";
 
@@ -17,8 +19,11 @@ export class TaskResponseDto {
 
     author: UserResponseDto
 
-    logs: LogResponseDto[]
+    tracker: TrackerResponseDto
 
+    assignedUser: UserResponseDto
+
+    logs: LogResponseDto[]
 
     constructor(task: TaskEntity) {
         this.id = task.id
@@ -26,6 +31,8 @@ export class TaskResponseDto {
         this.description = task.description
         this.status = task.status
         this.author = new UserResponseDto(task.author)
-        this.logs = task.logs.map(log => new LogResponseDto(log))
+        this.tracker = new TrackerResponseDto(task.tracker)
+        this.assignedUser = new UserResponseDto(task.assignedUser)
+        this.logs = task.logs?.map(log => new LogResponseDto(log))
     }
 }

@@ -34,8 +34,14 @@ export class TaskEntity extends BaseEntity {
     @ManyToOne(user => UserEntity, user => user.assignedTasks, { eager: false })
     assignedUser: UserEntity
 
+    @Column()
+    assignedUserId: number
+
     @ManyToOne(project => ProjectEntity, project => project.tasks)
     project: ProjectEntity
+
+    @Column()
+    projectId: number
 
     @OneToOne(tracker => TrackerEntity, tracker => tracker.task)
     tracker: TrackerEntity

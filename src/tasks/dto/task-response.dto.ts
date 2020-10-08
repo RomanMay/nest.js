@@ -1,7 +1,6 @@
 import { UserResponseDto } from "src/auth/dto/user-response.dto";
 import { LogResponseDto } from "src/logger/dto/log-response.dto";
 import { TrackerResponseDto } from "src/tracker/dto/tracker-response.dto";
-import { TrackerEntity } from "src/tracker/tracker.entity";
 
 import { TaskStatus } from "../task-status.enum";
 

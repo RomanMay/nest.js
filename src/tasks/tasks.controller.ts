@@ -17,7 +17,7 @@ import { TaskStatus } from './task-status.enum'
 
 import { GetUser } from '../auth/get-user.decorator'
 import { ApiBearerAuth } from '@nestjs/swagger/dist/decorators/api-bearer.decorator'
-import { ApiBody } from '@nestjs/swagger'
+import { ApiParam } from '@nestjs/swagger'
 
 @ApiBearerAuth()
 @Controller('tasks')
@@ -106,14 +106,17 @@ export class TasksController {
     }
 
     @Patch('/:id/status/:status')
-    updateTaskStatus(
+    @ApiParam({name: 'status', enum: TaskStatus})
+    async updateTaskStatus(
         @Param('id', ParseIntPipe) id: number,
-        @Param('status', TaskStatusValidationPipe)  status: TaskStatus,
+        @Param('status') status: TaskStatus,
         @Ip() ipAddress: string,
         @GetUser() user: UserEntity
-    ):
-        Promise<TaskEntity> {
-        return this.tasksService.updateTaskStatus(id, status, user.id, ipAddress)
+    ):Promise<TaskResponseDto> {
+
+        const task = await this.tasksService.updateTaskStatus(id, status, user.id, ipAddress)
+
+        return new TaskResponseDto(task)
     }
 
     @Patch('/:id/assign/:assignedUserId')

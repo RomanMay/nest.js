@@ -12,18 +12,31 @@ export class TaskRepository extends Repository<TaskEntity> {
 
     async getFilteredByUser(filterDto: GetTasksFilterDto, user: UserEntity): Promise<TaskEntity[]> {
 
-        const { status } = filterDto
+        const { status, authorId, assignedUserId } = filterDto
+
+
 
         const query = this.createQueryBuilder("task")
         query
             .leftJoinAndSelect('task.project', 'project')
             .leftJoinAndSelect('task.author', 'author')
             .leftJoinAndSelect('task.assignedUser', 'assignedUser')
-            .where('task.authorId = :userId OR task."assignedUserId" = :userId', { userId: user.id })
+            .where('(task.authorId = :userId OR task."assignedUserId" = :userId)', { userId: user.id })
 
         if (status) {
             query.andWhere('task.status = :status', { status })
         }
+
+        if(authorId) {
+            query.andWhere('task.authorId = :authorId', { authorId })
+        }
+
+        if(assignedUserId) {
+            query.andWhere('task.assignedUserId = :assignedUserId', { assignedUserId})
+        }
+        
+
+        
 
         return query.getMany()
 

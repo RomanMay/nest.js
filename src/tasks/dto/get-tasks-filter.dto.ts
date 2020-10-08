@@ -1,14 +1,20 @@
 import { TaskStatus } from '../task-status.enum'
 
-import { IsOptional, IsNotEmpty, IsEnum } from 'class-validator'
+import { IsOptional, IsEnum } from 'class-validator'
+import { ApiProperty } from '@nestjs/swagger'
 
 export class GetTasksFilterDto {
 
     @IsOptional()
     @IsEnum(TaskStatus)
+    @ApiProperty()
     status: TaskStatus
+    
+    @IsOptional()
+    @ApiProperty()
+    authorId: number
 
     @IsOptional()
-    @IsNotEmpty()
-    search: string
+    @ApiProperty()
+    assignedUserId: number
 }
